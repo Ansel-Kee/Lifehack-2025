@@ -1,60 +1,66 @@
-console.log("🍃 content.js loaded");
+
 
 // retrieving the data from json file
-fetch(chrome.runtime.getURL("csvjson.json"))
-  .then((res) => res.json())
-  .then((data) => {
-  //tbd with logic later
-    const brand = "Nike";
-    const entry = data.find(
-      (item) => item["Shop Name"].toLowerCase() === brand.toLowerCase()
-    );
+window.onload = function(){
+  console.log("🍃 content.js loaded");
+  fetch(chrome.runtime.getURL("csvjson.json"))
+    .then((res) => res.json())
+    .then((data) => {
+      const shop = detectBrandFromPage();
+      if (shop === null) {
+        console.warn(`No shop found`);
+        return;
+      }
+      
+        const entry = findBrandData(shop, data);
+      
+      
 
-    if (!entry) {
-      console.warn(`No sustainability data found for brand: ${brand}`);
-      return;
-    }
-
-    const leafBtn = document.createElement("button");
-    leafBtn.textContent = "🍃";
-    Object.assign(leafBtn.style, {
-      position: "fixed",
-      top: "100px",
-      right: "20px",
-      zIndex: "9999",
-      background: "#e6f4ea",
-      color: "#4CAF50",
-      border: "2px solid #4CAF50",
-      borderRadius: "50%",
-      width: "40px",
-      height: "40px",
-      fontSize: "20px",
-      cursor: "pointer",
-    });
-    leafBtn.title = "View Sustainability Info";
-    document.body.appendChild(leafBtn);
-
-    leafBtn.onclick = () => {
-      if (document.getElementById("reportPanel")) return;
-
-      const panel = document.createElement("div");
-      panel.id = "reportPanel";
-      Object.assign(panel.style, {
+      if (entry === null) {
+        console.warn(`No sustainability data found for brand: ${shop}`);
+        return;
+      }
+      console.log(entry)
+      const leafBtn = document.createElement("button");
+      leafBtn.textContent = "🍃";
+      Object.assign(leafBtn.style, {
         position: "fixed",
-        top: "160px",
+        top: "100px",
         right: "20px",
-        background: "#f9fff6",
-        padding: "16px",
-        borderLeft: "5px solid #74c67a",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-        borderRadius: "12px",
-        maxWidth: "260px",
         zIndex: "9999",
-        fontFamily: "Segoe UI, sans-serif",
-        animation: "slideIn 0.4s ease-out",
+        background: "#e6f4ea",
+        color: "#4CAF50",
+        border: "2px solid #4CAF50",
+        borderRadius: "50%",
+        width: "40px",
+        height: "40px",
+        fontSize: "20px",
+        cursor: "pointer",
       });
+      leafBtn.title = "View Sustainability Info";
+      document.body.appendChild(leafBtn);
 
-      panel.innerHTML = `
+      leafBtn.onclick = () => {
+        if (document.getElementById("reportPanel")) return;
+
+        const panel = document.createElement("div");
+        panel.id = "reportPanel";
+        Object.assign(panel.style, {
+          position: "fixed",
+          top: "160px",
+          right: "20px",
+          background: "#f9fff6",
+          padding: "16px",
+          borderLeft: "5px solid #74c67a",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+          borderRadius: "12px",
+          maxWidth: "260px",
+          zIndex: "9999",
+          fontFamily: "Segoe UI, sans-serif",
+          animation: "slideIn 0.4s ease-out",
+        });
+
+        panel.innerHTML = `
         <style>
           @keyframes slideIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -77,10 +83,55 @@ fetch(chrome.runtime.getURL("csvjson.json"))
         </ul>
       `;
 
-      document.body.appendChild(panel);
+        document.body.appendChild(panel);
 
-      document.getElementById("closeBtn").onclick = () => {
-        panel.remove();
+        document.getElementById("closeBtn").onclick = () => {
+          panel.remove();
+        };
       };
-    };
-  });
+    });
+  };
+
+
+function detectBrandFromPage() {
+
+  let url = window.location.host;
+  if (url.includes("www")) {
+    url = url.slice(url.indexOf(".") + 1);
+  }
+  let shop = null;
+  console.log(url)
+  if (url === "shopee.sg") {
+    // console.log(document.getElementsByClassName("fV3TIn"));
+    // console.log(document.getElementsByClassName("fV3TIn")[0]);
+    // console.log(document.getElementsByClassName("fV3TIn"));
+    shop = document.getElementsByClassName("fV3TIn")[0].textContent;
+  }
+  else if (url === "lazada.sg") {
+    shop = document.getElementsByClassName("seller-name__detail")[0].textContent;
+  }
+  else if (url === "amazon.sg") {
+    const byline = document.getElementById("bylineInfo").textContent;
+    if (byline.includes("Visit the ")) {
+      shop = byline.slice(10, byline.indexOf(" Store"));
+    }
+    else if (byline.includes("Brand: ")) {
+      shop = byline.slice(7);
+    }
+
+  }
+  else {
+    shop = url.slice(0, url.indexOf("."));
+  }
+
+  console.log(shop)
+
+  return shop;
+
+}
+
+// 3. Function to find brand match from the CSV dataset
+function findBrandData(shop, csvData) {
+  console.log(shop)
+  return csvData.find(row => shop.includes(row["Shop Name"].toLowerCase().replace("/^[a-zA-Z]*$/", "")));
+}
