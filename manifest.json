@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "EcoBrand Checker",
+  "version": "1.0",
+  "description": "Show sustainability report for known fashion brands.",
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "csvjson.json",
+        "images/*.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+
+  "action": {
+  "default_popup": "popup.html",
+  "default_icon": "images/leaf48.png"
+},
+
+  "icons": {
+    "48": "images/leaf48.png"
+  }
+
+  
+}
