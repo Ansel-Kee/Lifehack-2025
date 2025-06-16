@@ -3,7 +3,7 @@
   "name": "EcoBrand Checker",
   "version": "1.0",
   "description": "Show sustainability report for known fashion brands.",
-  "permissions": ["scripting", "activeTab"],
+  "permissions": ["tabs", "scripting", "activeTab"],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [
     {
