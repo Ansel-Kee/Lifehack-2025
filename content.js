@@ -54,10 +54,12 @@ leafBtn.onclick = () => {
       right: "20px",
       background: "#f9fff6",
       padding: "16px",
+      
       borderLeft: "5px solid #74c67a",
       boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
       borderRadius: "12px",
       maxWidth: "280px",
+
       zIndex: "9999",
       fontFamily: "Segoe UI, sans-serif",
       animation: "slideIn 0.4s ease-out",
@@ -71,22 +73,41 @@ leafBtn.onclick = () => {
       let altCompanies = filterAlternative(entry, data);
       let companies = scoreComparison(altCompanies, entry, data);
       panel.innerHTML = `
-    <button id="closeBtn" style="
+      <style>
+      .altdiv{
+      max-height:300px;
+      overflow-y:auto;
+      }
+      .backBtn{
+        position:absolute; top:8px; left:10px; border:2px;background:none;
+        font-size:16px; cursor:pointer; color:#666;
+      }
+
+      </style>
+      <body> </body>
+      <div>
+      <button id="closeBtn" style="
         position:absolute; top:8px; right:10px; border:none; background:none;
         font-size:16px; cursor:pointer; color:#666;">❌</button>
-      <button id="backBtn" style="
-        position:absolute; top:8px; left:10px; border:none; background:none;
-        font-size:16px; cursor:pointer; color:#666;">Back</button>
-      <ul id="alts" style="nav ul{height:200px; width:18%;}; nav ul{overflow:hidden; overflow-y:scroll;}">
+      <button id="backBtn">Back</button>
+        </div>
+      <div class="altdiv">
+      <ul id="alts">
         
-      </ul>
+      </ul></div> 
     `;
       
       var list = document.getElementById("alts")
       companies.forEach((company) => {
+        const ecoScore = computeEcoScore(company, data);
+        const starCount = Math.round(ecoScore / 20); // 5-star scale
+        const stars = "⭐️".repeat(starCount) + "☆".repeat(5 - starCount);
         let li = document.createElement("li")
         
-        list.appendChild(li).innerHTML = `<li><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> CO₂: ${entry["CO2"]} tons/year</li>
+        list.appendChild(li).innerHTML = `
+        <h3 style="margin-top:0; font-size:18px; color:#2e7d32;">${company["Shop Name"]}</h3>
+        <li><strong>EcoScore: ${ecoScore}/100</strong> <br/>${stars}</li>
+        <li><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> CO₂: ${company["CO2"]} tons/year</li>
         <li><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> Water: ${company["Water"]} million L/year</li>
         <li><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> Electricity: ${company["Electricity"]} GWh/year</li>
         <li><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> Waste: ${company["Waste"]} tons/year</li>
@@ -116,6 +137,9 @@ leafBtn.onclick = () => {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        .reportPanel{
+        max-height:300px
+        }
       </style>
       <button id="closeBtn" style="
         position:absolute; top:8px; right:10px; border:none; background:none;
@@ -124,7 +148,7 @@ leafBtn.onclick = () => {
       <h3 style="margin-top:0; font-size:18px; color:#2e7d32;">${entry["Shop Name"]}</h3>
       <p style="margin-bottom:12px;"><em>${entry["Category"]}</em></p>
 
-      <ul style="list-style:none; padding:0; margin:0; line-height:1.8;">
+      <ul style="list-style:none; padding:0; margin:15px; line-height:1.8;">
         <li><strong>EcoScore: ${ecoScore}/100</strong> <br/>${stars}</li>
         <li><strong>Ranking:</strong> #${rank} of ${total}</li>
         <li><strong>Average Score:</strong> ${averageScore}/100</li>
@@ -136,10 +160,8 @@ leafBtn.onclick = () => {
         <li><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> ISO Certified: ${entry["ISO Certified"]}</li>
 
         </ul>
-      <p></p>
-      <p></p>
-      <button id="altBtn" style="
-        position:absolute; bottom:8px; right:70px; border-radius:5px; background:none;
+        <button id="altBtn" style="
+        display: grid; place-items: center; border-radius:5px; background:none; margin-top:5px;
         font-size:16px; cursor:pointer; color:#666;">Alternatives</button>
     `;
     panel.innerHTML = companyInfo
