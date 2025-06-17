@@ -99,13 +99,13 @@ function detectBrandFromPage() {
     url = url.slice(url.indexOf(".") + 1);
   }
   let shop = null;
-  if (url === "shopee.sg") {
+  if (url.includes("shopee")) {
     shop = document.getElementsByClassName("fV3TIn")[0].textContent;
   }
-  else if (url === "lazada.sg") {
+  else if (url.includes("lazada")) {
     shop = document.getElementsByClassName("seller-name__detail")[0].textContent;
   }
-  else if (url === "amazon.sg") {
+  else if (url.includes("amazon")) {
     const byline = document.getElementById("bylineInfo").textContent;
     if (byline.includes("Visit the ")) {
       shop = byline.slice(10, byline.indexOf(" Store"));
