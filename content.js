@@ -1,18 +1,18 @@
 
 
 // retrieving the data from json file
-window.onload = function(){
-  console.log("🍃 content.js loaded");
+console.log("🍃 content.js loaded");
   fetch(chrome.runtime.getURL("csvjson.json"))
     .then((res) => res.json())
     .then((data) => {
+      console.log("json loaded")
       const shop = detectBrandFromPage();
       if (shop === null) {
         console.warn(`No shop found`);
         return;
       }
       
-        const entry = findBrandData(shop, data);
+      const entry = findBrandData(shop, data);
       
       
 
@@ -90,21 +90,16 @@ window.onload = function(){
         };
       };
     });
-  };
+
 
 
 function detectBrandFromPage() {
-
   let url = window.location.host;
   if (url.includes("www")) {
     url = url.slice(url.indexOf(".") + 1);
   }
   let shop = null;
-  console.log(url)
   if (url === "shopee.sg") {
-    // console.log(document.getElementsByClassName("fV3TIn"));
-    // console.log(document.getElementsByClassName("fV3TIn")[0]);
-    // console.log(document.getElementsByClassName("fV3TIn"));
     shop = document.getElementsByClassName("fV3TIn")[0].textContent;
   }
   else if (url === "lazada.sg") {
@@ -124,7 +119,6 @@ function detectBrandFromPage() {
     shop = url.slice(0, url.indexOf("."));
   }
 
-  console.log(shop)
 
   return shop;
 
@@ -133,5 +127,5 @@ function detectBrandFromPage() {
 // 3. Function to find brand match from the CSV dataset
 function findBrandData(shop, csvData) {
   console.log(shop)
-  return csvData.find(row => shop.includes(row["Shop Name"].toLowerCase().replace("/^[a-zA-Z]*$/", "")));
+  return csvData.find(row => shop.includes(row["Shop Name"].toLowerCase().replace(/[\W_]+/g, "")));
 }
