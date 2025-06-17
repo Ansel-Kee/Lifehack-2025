@@ -43,8 +43,7 @@ const weights = {
   leafBtn.title = "View Sustainability Info";
   document.body.appendChild(leafBtn);
 
-  leafBtn.onclick = () => createPopup();
-  function createPopup(){
+leafBtn.onclick = () => {
     if (document.getElementById("reportPanel")) return;
 
     const panel = document.createElement("div");
@@ -69,7 +68,6 @@ const weights = {
       score: computeEcoScore(b, data)
     }));
     function alt(){
-      console.log("alt")
       let altCompanies = filterAlternative(entry, data);
       let companies = scoreComparison(altCompanies, entry, data);
       panel.innerHTML = `
@@ -95,7 +93,13 @@ const weights = {
         <li><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> ISO Certified: ${company["ISO Certified"]}</li>
         <li></li>`
       });
-      document.getElementById("backBtn").onclick = () =>  createPopup();
+      document.getElementById("backBtn").onclick = () =>  {
+        panel.innerHTML = companyInfo;
+        document.getElementById("closeBtn").onclick = () => panel.remove();
+        document.getElementById("altBtn").onclick = ()=> alt();
+    
+      }
+      document.getElementById("closeBtn").onclick = () => panel.remove();
     };
     const sorted = scoredData.sort((a, b) => b.score - a.score);
     const ecoScore = computeEcoScore(entry, data);
@@ -106,7 +110,7 @@ const weights = {
     const starCount = Math.round(ecoScore / 20); // 5-star scale
     const stars = "⭐️".repeat(starCount) + "☆".repeat(5 - starCount);
 
-    companyInfo = `
+    let companyInfo = `
       <style>
         @keyframes slideIn {
           from { opacity: 0; transform: translateY(10px); }
@@ -138,7 +142,7 @@ const weights = {
         position:absolute; bottom:8px; right:70px; border-radius:5px; background:none;
         font-size:16px; cursor:pointer; color:#666;">Alternatives</button>
     `;
-
+    panel.innerHTML = companyInfo
     document.body.appendChild(panel);
     document.getElementById("closeBtn").onclick = () => panel.remove();
     document.getElementById("altBtn").onclick = ()=> alt();
