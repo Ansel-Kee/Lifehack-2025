@@ -8,16 +8,17 @@ const weights = {
 };
 (async () => {
   const data = await fetch(chrome.runtime.getURL("csvjson.json")).then(res => res.json());
+  console.log("json loaded");
 
-  const shop = await detectBrandFromPage(); // now async
+  const shop = await detectBrandFromPage();
   if (!shop) {
-    console.warn("No shop found");
+    console.warn("❌ No shop found");
     return;
   }
 
   const entry = findBrandData(shop, data);
   if (!entry) {
-    console.warn(`No sustainability data found for brand: ${shop}`);
+    console.warn(`❌ No sustainability data found for brand: ${shop}`);
     return;
   }
 
@@ -57,7 +58,7 @@ const weights = {
       borderLeft: "5px solid #74c67a",
       boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
       borderRadius: "12px",
-      maxWidth: "260px",
+      maxWidth: "280px",
       zIndex: "9999",
       fontFamily: "Segoe UI, sans-serif",
       animation: "slideIn 0.4s ease-out",
@@ -137,7 +138,6 @@ const weights = {
         position:absolute; bottom:8px; right:70px; border-radius:5px; background:none;
         font-size:16px; cursor:pointer; color:#666;">Alternatives</button>
     `;
-    panel.innerHTML = companyInfo
 
     document.body.appendChild(panel);
     document.getElementById("closeBtn").onclick = () => panel.remove();
@@ -147,16 +147,26 @@ const weights = {
 
 async function detectBrandFromPage() {
   let url = window.location.host;
-  if (url.includes("www")) {
-    url = url.slice(url.indexOf(".") + 1);
-  }
+  if (url.includes("www")) url = url.slice(url.indexOf(".") + 1);
 
   if (url === "shopee.sg") {
     const el = await waitForElement(".fV3TIn");
     return el.textContent.trim();
+
   } else if (url === "lazada.sg") {
-    const el = await waitForElement(".seller-name__detail");
-    return el.textContent.trim();
+    let el;
+    try {
+      el = await waitForElement(".seller-name__detail");
+    } catch {
+      try {
+        el = await waitForElement(".pdp-product-brand-v2__brand-link");
+      } catch {
+      console.warn("Lazada brand element not found");
+      return null;
+    }
+  }
+  return el.textContent.trim();
+
   } else if (url === "amazon.sg") {
     const el = await waitForElement("#bylineInfo");
     const byline = el.textContent.trim();
@@ -172,9 +182,9 @@ async function detectBrandFromPage() {
   return null;
 }
 
-function findBrandData(shop, csvData) {
+function findBrandData(shop, data) {
   const cleanedShop = shop.toLowerCase().replace(/[\W_]+/g, "");
-  return csvData.find(row =>
+  return data.find(row =>
     cleanedShop.includes(row["Shop Name"].toLowerCase().replace(/[\W_]+/g, ""))
   );
 }
@@ -194,10 +204,10 @@ function waitForElement(selector, timeout = 5000) {
 
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // setTimeout(() => {
-    //   observer.disconnect();
-    //   reject(new Error(`Timed out waiting for ${selector}`));
-    // }, timeout);
+    setTimeout(() => {
+      observer.disconnect();
+      reject(new Error(`Timed out waiting for ${selector}`));
+    }, timeout);
   });
 }
 
@@ -256,3 +266,87 @@ function scoreComparison(filteredCompanies, entry, data) {
   return betterCompanies;
 }
 
+// 1) Your patterns stay the same:
+const patterns = [
+  {
+    category: "Quantitative recycled-content",
+    description: "percentages like “X% recycled” that claim a concrete amount.",
+    severity: "issue",
+    regex: /\b\d+\s*%\s*recycled\b/gi
+  },
+  {
+    category: "Partial-component call-outs",
+    description: "Highlighting only one part (e.g. lining or insole) as recycled while ignoring the rest.",
+    severity: "warning",
+    regex: /\b(?:vamp|collar|tongue|lining|insole)\b.*\b(recycled)\b/gi
+  },
+  {
+    category: "Unspecified Quantity Claims",
+    description: "Vague terms that don’t commit to a precise number (e.g. “up to”, “almost”).",
+    severity: "warning",
+    regex: /\b(?:at least|up to|approximately|around|nearly|over|under|more than|less than|only|just)\b/gi
+  },
+  {
+    category: "Vague sustainability keywords",
+    description: "keywords without hard data (e.g. “slow fashion,” “upcycled”).",
+    severity: "issue",
+    regex: /\b(?:eco[-\s]?friendly|sustainable|natural|naturel|planet[-\s]?positive|future[-\s]?friendly|environmentally[-\s]?sound|eco[-\s]?conscious|environmentally responsible|eco[-\s]?innovation|slow[-\s]?fashion|organic\s+cotton|plant[-\s]?based\s+dyes?|fair[-\s]?trade|upcycled|cruelty[-\s]?free\s+leather|regenerative\s+agriculture|traceable\s+supply\s+chain|zero[-\s]?discharge|waterless\s+dyeing|non[-\s]?mulesed\s+wool|closed[-\s]?loop|low[-\s]?impact\s+fabric|recyclable\s+packaging)\b/gi
+  }
+];
+
+// 2) Build your findings
+const text = document.body.innerText;
+const findings = patterns
+  .map(({ category, description, severity, regex }) => {
+    const matches = text.match(regex);
+    return matches
+      ? { category, description, severity, hits: [...new Set(matches)] }
+      : null;
+  })
+  .filter(Boolean);
+
+// 3) Safe highlighting via TreeWalker
+function highlightText(term, className) {
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false
+  );
+  const regex = new RegExp(term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+  const toWrap = [];
+
+  let node;
+  while (node = walker.nextNode()) {
+    if (regex.test(node.nodeValue)) {
+      toWrap.push(node);
+    }
+  }
+
+  toWrap.forEach(textNode => {
+    const frag = document.createDocumentFragment();
+    let last = 0;
+    textNode.nodeValue.replace(regex, (match, offset) => {
+      frag.appendChild(document.createTextNode(textNode.nodeValue.slice(last, offset)));
+      const mark = document.createElement('mark');
+      mark.className = className;
+      mark.textContent = match;
+      frag.appendChild(mark);
+      last = offset + match.length;
+    });
+    frag.appendChild(document.createTextNode(textNode.nodeValue.slice(last)));
+    textNode.parentNode.replaceChild(frag, textNode);
+  });
+}
+
+findings.forEach(({ hits, severity }) => {
+  hits.forEach(term => highlightText(term, `gw-${severity}`));
+});
+
+// 4) Messaging for popup.js (unchanged)
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+
+  if (msg.type === "REQUEST_FINDINGS") {
+    sendResponse({ findings });
+  }
+});
