@@ -94,9 +94,21 @@ async function detectBrandFromPage() {
   if (url === "shopee.sg") {
     const el = await waitForElement(".fV3TIn");
     return el.textContent.trim();
+
   } else if (url === "lazada.sg") {
-    const el = await waitForElement(".seller-name__detail");
-    return el.textContent.trim();
+    let el;
+    try {
+      el = await waitForElement(".seller-name__detail");
+    } catch {
+      try {
+        el = await waitForElement(".pdp-product-brand-v2__brand-link");
+      } catch {
+      console.warn("Lazada brand element not found");
+      return null;
+    }
+  }
+  return el.textContent.trim();
+
   } else if (url === "amazon.sg") {
     const el = await waitForElement("#bylineInfo");
     const byline = el.textContent.trim();
