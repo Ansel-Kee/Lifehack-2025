@@ -1,4 +1,4 @@
-console.log("🍃 content.js loaded");
+
 const weights = {
   CO2: 0.4,
   Water: 0.2,
@@ -6,8 +6,9 @@ const weights = {
   Waste: 0.1,
   ISO: 0.1
 };
+
 (async () => {
-  const data = await fetch(chrome.runtime.getURL("csvjson.json")).then(res => res.json());
+  const data = await fetch(chrome.runtime.getURL("data.json")).then(res => res.json());
   console.log("json loaded");
 
   const shop = await detectBrandFromPage();
