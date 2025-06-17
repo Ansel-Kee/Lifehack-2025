@@ -3,7 +3,7 @@
 ## Features
 1. Automatic Sustainability report for the brand of the product page
     - Supports Shopee, Lazada, Amazon and various brand websites
-2. Alternative recommendations for more sustainable options
+2. Provide alternative brand recommendations based on our weighted EcoScore to guide users toward more sustainable choices.
 3. Greenwashing checker
     - Check if a brand tries to appear more green than they are!
 ===============
