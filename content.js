@@ -4,7 +4,7 @@ console.log("🍃 content.js loaded");
   const data = await fetch(chrome.runtime.getURL("csvjson.json")).then(res => res.json());
   console.log("json loaded");
 
-  const shop = await detectBrandFromPage(); // now async
+  const shop = await detectBrandFromPage();
   if (!shop) {
     console.warn("❌ No shop found");
     return;
@@ -37,7 +37,45 @@ console.log("🍃 content.js loaded");
   leafBtn.title = "View Sustainability Info";
   document.body.appendChild(leafBtn);
 
-  leafBtn.onclick = () => {
+  
+// === NORMALISATION HELPERS ===
+function getMinMax(key) {
+  const values = data.map(b => parseFloat(b[key]));
+  return { min: Math.min(...values), max: Math.max(...values) };
+}
+
+function normalise(value, min, max) {
+  return 1 - (value - min) / (max - min); // lower is better
+}
+
+// === WEIGHTS (EDITABLE) ===
+const weights = {
+  CO2: 0.4,
+  Water: 0.2,
+  Electricity: 0.2,
+  Waste: 0.1,
+  ISO: 0.1
+};
+
+// === SCORE CALCULATION ===
+function computeEcoScore(entry) {
+  const keys = ["CO2", "Water", "Electricity", "Waste"];
+  let score = 0;
+
+  for (const key of keys) {
+    const { min, max } = getMinMax(key);
+    const raw = parseFloat(entry[key]);
+    const norm = normalise(raw, min, max);
+    score += weights[key] * norm;
+  }
+
+  const isoScore = (entry["ISO Certified"]?.toLowerCase() === "yes") ? 1 : 0;
+  score += weights.ISO * isoScore;
+
+  return Math.round(score * 100);
+}
+
+leafBtn.onclick = () => {
     if (document.getElementById("reportPanel")) return;
 
     const panel = document.createElement("div");
@@ -51,11 +89,28 @@ console.log("🍃 content.js loaded");
       borderLeft: "5px solid #74c67a",
       boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
       borderRadius: "12px",
-      maxWidth: "260px",
+      maxWidth: "280px",
       zIndex: "9999",
       fontFamily: "Segoe UI, sans-serif",
       animation: "slideIn 0.4s ease-out",
     });
+
+    // Create a simple star rating from score
+    
+    const scoredData = data.map(b => ({
+      name: b["Shop Name"],
+      score: computeEcoScore(b)
+    }));
+
+    const sorted = scoredData.sort((a, b) => b.score - a.score);
+    const ecoScore = computeEcoScore(entry);
+    const rank = sorted.findIndex(b => b.name.toLowerCase() === entry["Shop Name"].toLowerCase()) + 1;
+    const total = sorted.length;
+    const averageScore = Math.round(sorted.reduce((acc, b) => acc + b.score, 0) / total);
+    const topBrands = sorted.slice(0, 3).map(b => b.name);
+    
+    const starCount = Math.round(ecoScore / 20); // 5-star scale
+    const stars = "⭐️".repeat(starCount) + "☆".repeat(5 - starCount);
 
     panel.innerHTML = `
       <style>
@@ -72,11 +127,15 @@ console.log("🍃 content.js loaded");
       <p style="margin-bottom:12px;"><em>${entry["Category"]}</em></p>
 
       <ul style="list-style:none; padding:0; margin:0; line-height:1.8;">
-        <li><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> <strong>${entry["CO2 Emitted (tons/year)"]} tons/year</strong></li>
-        <li><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> <strong>${entry["Water Usage (million liters/year)"]} million liters/year</strong></li>
-        <li><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> <strong>${entry["Electricity Usage (GWh/year)"]} GWh/year</strong></li>
-        <li><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> <strong>${entry["Waste Generated (tons/year)"]} tons/year</strong></li>
-        <li><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> <strong>ISO Certified: ${entry["ISO Certified"]}</strong></li>
+        <li><strong>EcoScore: ${ecoScore}/100</strong> <br/>${stars}</li>
+        <li><strong>Ranking:</strong> #${rank} of ${total}</li>
+        <li><strong>Average Score:</strong> ${averageScore}/100</li>
+        <li><strong>Top Brands:</strong> ${topBrands.join(", ")}</li>
+        <li><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> CO₂: ${entry["CO2"]} tons/year</li>
+        <li><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> Water: ${entry["Water"]} million L/year</li>
+        <li><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> Electricity: ${entry["Electricity"]} GWh/year</li>
+        <li><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> Waste: ${entry["Waste"]} tons/year</li>
+        <li><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> ISO Certified: ${entry["ISO Certified"]}</li>
       </ul>
     `;
 
@@ -87,9 +146,7 @@ console.log("🍃 content.js loaded");
 
 async function detectBrandFromPage() {
   let url = window.location.host;
-  if (url.includes("www")) {
-    url = url.slice(url.indexOf(".") + 1);
-  }
+  if (url.includes("www")) url = url.slice(url.indexOf(".") + 1);
 
   if (url === "shopee.sg") {
     const el = await waitForElement(".fV3TIn");
@@ -124,9 +181,9 @@ async function detectBrandFromPage() {
   return null;
 }
 
-function findBrandData(shop, csvData) {
+function findBrandData(shop, data) {
   const cleanedShop = shop.toLowerCase().replace(/[\W_]+/g, "");
-  return csvData.find(row =>
+  return data.find(row =>
     cleanedShop.includes(row["Shop Name"].toLowerCase().replace(/[\W_]+/g, ""))
   );
 }
@@ -152,3 +209,88 @@ function waitForElement(selector, timeout = 5000) {
     }, timeout);
   });
 }
+
+// 1) Your patterns stay the same:
+const patterns = [
+  {
+    category: "Quantitative recycled-content",
+    description: "percentages like “X% recycled” that claim a concrete amount.",
+    severity: "issue",
+    regex: /\b\d+\s*%\s*recycled\b/gi
+  },
+  {
+    category: "Partial-component call-outs",
+    description: "Highlighting only one part (e.g. lining or insole) as recycled while ignoring the rest.",
+    severity: "warning",
+    regex: /\b(?:vamp|collar|tongue|lining|insole)\b.*\b(recycled)\b/gi
+  },
+  {
+    category: "Unspecified Quantity Claims",
+    description: "Vague terms that don’t commit to a precise number (e.g. “up to”, “almost”).",
+    severity: "warning",
+    regex: /\b(?:at least|up to|approximately|around|nearly|over|under|more than|less than|only|just)\b/gi
+  },
+  {
+    category: "Vague sustainability keywords",
+    description: "keywords without hard data (e.g. “slow fashion,” “upcycled”).",
+    severity: "issue",
+    regex: /\b(?:eco[-\s]?friendly|sustainable|natural|naturel|planet[-\s]?positive|future[-\s]?friendly|environmentally[-\s]?sound|eco[-\s]?conscious|environmentally responsible|eco[-\s]?innovation|slow[-\s]?fashion|organic\s+cotton|plant[-\s]?based\s+dyes?|fair[-\s]?trade|upcycled|cruelty[-\s]?free\s+leather|regenerative\s+agriculture|traceable\s+supply\s+chain|zero[-\s]?discharge|waterless\s+dyeing|non[-\s]?mulesed\s+wool|closed[-\s]?loop|low[-\s]?impact\s+fabric|recyclable\s+packaging)\b/gi
+  }
+];
+
+// 2) Build your findings
+const text = document.body.innerText;
+const findings = patterns
+  .map(({ category, description, severity, regex }) => {
+    const matches = text.match(regex);
+    return matches
+      ? { category, description, severity, hits: [...new Set(matches)] }
+      : null;
+  })
+  .filter(Boolean);
+
+// 3) Safe highlighting via TreeWalker
+function highlightText(term, className) {
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false
+  );
+  const regex = new RegExp(term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+  const toWrap = [];
+
+  let node;
+  while (node = walker.nextNode()) {
+    if (regex.test(node.nodeValue)) {
+      toWrap.push(node);
+    }
+  }
+
+  toWrap.forEach(textNode => {
+    const frag = document.createDocumentFragment();
+    let last = 0;
+    textNode.nodeValue.replace(regex, (match, offset) => {
+      frag.appendChild(document.createTextNode(textNode.nodeValue.slice(last, offset)));
+      const mark = document.createElement('mark');
+      mark.className = className;
+      mark.textContent = match;
+      frag.appendChild(mark);
+      last = offset + match.length;
+    });
+    frag.appendChild(document.createTextNode(textNode.nodeValue.slice(last)));
+    textNode.parentNode.replaceChild(frag, textNode);
+  });
+}
+
+findings.forEach(({ hits, severity }) => {
+  hits.forEach(term => highlightText(term, `gw-${severity}`));
+});
+
+// 4) Messaging for popup.js (unchanged)
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+
+  if (msg.type === "REQUEST_FINDINGS") {
+    sendResponse({ findings });
+  }
+});
