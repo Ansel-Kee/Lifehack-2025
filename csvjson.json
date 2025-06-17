@@ -1,7 +1,7 @@
 [
   {
     "Shop Name": "Armani",
-    "Category": "Luxury Fashion",
+    "Category": ["Luxury Fashion"],
     "CO2 Emitted (tons/year)": 909386.5,
     "Water Usage (million liters/year)": 36127.49,
     "Electricity Usage (GWh/year)": 5642.04,
@@ -10,7 +10,7 @@
   },
   {
     "Shop Name": "Skechers",
-    "Category": "Footwear",
+    "Category": ["Footwear"],
     "CO2 Emitted (tons/year)": 766216.8,
     "Water Usage (million liters/year)": 29294.35,
     "Electricity Usage (GWh/year)": 9295.76,
@@ -19,7 +19,7 @@
   },
   {
     "Shop Name": "Lacoste",
-    "Category": "Casual & Sportswear",
+    "Category": ["Casual", "Sportswear"],
     "CO2 Emitted (tons/year)": 1322393.66,
     "Water Usage (million liters/year)": 29025.74,
     "Electricity Usage (GWh/year)": 516.42,
@@ -28,7 +28,7 @@
   },
   {
     "Shop Name": "Montblanc",
-    "Category": "Luxury Accessories",
+    "Category": ["Luxury Accessories"],
     "CO2 Emitted (tons/year)": 1271732.49,
     "Water Usage (million liters/year)": 4339.76,
     "Electricity Usage (GWh/year)": 1679.39,
@@ -37,7 +37,7 @@
   },
   {
     "Shop Name": "Burberry",
-    "Category": "Luxury Fashion",
+    "Category": ["Luxury Fashion"],
     "CO2 Emitted (tons/year)": 527053.9,
     "Water Usage (million liters/year)": 28581.24,
     "Electricity Usage (GWh/year)": 1140.26,
@@ -46,7 +46,7 @@
   },
   {
     "Shop Name": "Stradivarius",
-    "Category": "Fast Fashion",
+    "Category": ["Fast Fashion"],
     "CO2 Emitted (tons/year)": 1900947.5,
     "Water Usage (million liters/year)": 46003.3,
     "Electricity Usage (GWh/year)": 2328.93,
@@ -55,7 +55,7 @@
   },
   {
     "Shop Name": "Nike",
-    "Category": "Footwear & Apparel",
+    "Category": ["Footwear", "Apparel"],
     "CO2 Emitted (tons/year)": 106808.38,
     "Water Usage (million liters/year)": 44565.04,
     "Electricity Usage (GWh/year)": 2822.5,
@@ -64,7 +64,7 @@
   },
   {
     "Shop Name": "Columbia",
-    "Category": "Outdoor Apparel",
+    "Category": ["Outdoor Apparel"],
     "CO2 Emitted (tons/year)": 1001759.68,
     "Water Usage (million liters/year)": 26233.49,
     "Electricity Usage (GWh/year)": 549.71,
@@ -73,7 +73,7 @@
   },
   {
     "Shop Name": "Moncler",
-    "Category": "Luxury Winter Apparel",
+    "Category":[ "Luxury Winter Apparel"],
     "CO2 Emitted (tons/year)": 914071.63,
     "Water Usage (million liters/year)": 22197.92,
     "Electricity Usage (GWh/year)": 5488.4,
@@ -82,7 +82,7 @@
   },
   {
     "Shop Name": "Versace",
-    "Category": "Luxury Fashion",
+    "Category": ["Luxury Fashion"],
     "CO2 Emitted (tons/year)": 1202738.81,
     "Water Usage (million liters/year)": 48387.2,
     "Electricity Usage (GWh/year)": 6959.32,
@@ -91,7 +91,7 @@
   },
   {
     "Shop Name": "H&M",
-    "Category": "Fast Fashion",
+    "Category": ["Fast Fashion"],
     "CO2 Emitted (tons/year)": 382617.56,
     "Water Usage (million liters/year)": 36918.45,
     "Electricity Usage (GWh/year)": 5191.08,
@@ -100,7 +100,7 @@
   },
   {
     "Shop Name": "Mango",
-    "Category": "Fast Fashion",
+    "Category": ["Fast Fashion"],
     "CO2 Emitted (tons/year)": 1220376.13,
     "Water Usage (million liters/year)": 41132.83,
     "Electricity Usage (GWh/year)": 8656.65,
@@ -109,7 +109,7 @@
   },
   {
     "Shop Name": "Adidas",
-    "Category": "Footwear & Apparel",
+    "Category": ["Footwear", "Apparel"],
     "CO2 Emitted (tons/year)": 1845545.07,
     "Water Usage (million liters/year)": 34010,
     "Electricity Usage (GWh/year)": 6202.43,
@@ -118,7 +118,7 @@
   },
   {
     "Shop Name": "New Balance",
-    "Category": "Footwear & Sportswear",
+    "Category": ["Footwear", "Sportswear"],
     "CO2 Emitted (tons/year)": 131850.79,
     "Water Usage (million liters/year)": 3282.49,
     "Electricity Usage (GWh/year)": 7317.59,
@@ -127,7 +127,7 @@
   },
   {
     "Shop Name": "Crocs",
-    "Category": "Casual Footwear",
+    "Category": ["Footwear"],
     "CO2 Emitted (tons/year)": 1096193.37,
     "Water Usage (million liters/year)": 23773.53,
     "Electricity Usage (GWh/year)": 3867.84,
@@ -136,7 +136,7 @@
   },
   {
     "Shop Name": "Reebok",
-    "Category": "Footwear & Activewear",
+    "Category": ["Footwear", "Activewear"],
     "CO2 Emitted (tons/year)": 1151013.62,
     "Water Usage (million liters/year)": 9390.58,
     "Electricity Usage (GWh/year)": 7824.39,
@@ -145,7 +145,7 @@
   },
   {
     "Shop Name": "Puma",
-    "Category": "Footwear & Sportswear",
+    "Category": ["Footwear", "Sportswear"],
     "CO2 Emitted (tons/year)": 1073168.11,
     "Water Usage (million liters/year)": 48233.46,
     "Electricity Usage (GWh/year)": 5088.55,
@@ -154,7 +154,7 @@
   },
   {
     "Shop Name": "Superdry",
-    "Category": "Casual & Sportswear",
+    "Category": ["Casual", "Sportswear"],
     "CO2 Emitted (tons/year)": 163119.8,
     "Water Usage (million liters/year)": 17914.49,
     "Electricity Usage (GWh/year)": 7128.7,
@@ -163,7 +163,7 @@
   },
   {
     "Shop Name": "Rolex",
-    "Category": "Luxury Watches",
+    "Category": ["Luxury Watches"],
     "CO2 Emitted (tons/year)": 1669335.81,
     "Water Usage (million liters/year)": 31591.44,
     "Electricity Usage (GWh/year)": 7758.49,
@@ -172,7 +172,7 @@
   },
   {
     "Shop Name": "Converse",
-    "Category": "Sneakers",
+    "Category": ["Sneakers"],
     "CO2 Emitted (tons/year)": 362264.39,
     "Water Usage (million liters/year)": 2601.92,
     "Electricity Usage (GWh/year)": 2976.57,
@@ -181,7 +181,7 @@
   },
   {
     "Shop Name": "Boss",
-    "Category": "Formalwear",
+    "Category": ["Formalwear"],
     "CO2 Emitted (tons/year)": 1460695.27,
     "Water Usage (million liters/year)": 38813.08,
     "Electricity Usage (GWh/year)": 3063.69,
@@ -190,7 +190,7 @@
   },
   {
     "Shop Name": "Bershka",
-    "Category": "Fast Fashion",
+    "Category": ["Fast Fashion"],
     "CO2 Emitted (tons/year)": 1779665.19,
     "Water Usage (million liters/year)": 23658.64,
     "Electricity Usage (GWh/year)": 1442.29,
@@ -199,7 +199,7 @@
   },
   {
     "Shop Name": "Ralph Lauren",
-    "Category": "Luxury Apparel",
+    "Category": ["Luxury Apparel"],
     "CO2 Emitted (tons/year)": 1290577.86,
     "Water Usage (million liters/year)": 10748.18,
     "Electricity Usage (GWh/year)": 7161.25,
@@ -208,7 +208,7 @@
   },
   {
     "Shop Name": "Canada Goose",
-    "Category": "Winter Apparel",
+    "Category": ["Winter Apparel"],
     "CO2 Emitted (tons/year)": 1616516.27,
     "Water Usage (million liters/year)": 18131.68,
     "Electricity Usage (GWh/year)": 9525.3,
@@ -217,7 +217,7 @@
   },
   {
     "Shop Name": "Gap",
-    "Category": "Casual Apparel",
+    "Category": ["Casual Apparel"],
     "CO2 Emitted (tons/year)": 506481.86,
     "Water Usage (million liters/year)": 9670.81,
     "Electricity Usage (GWh/year)": 374.56,
@@ -226,7 +226,7 @@
   },
   {
     "Shop Name": "Levi's",
-    "Category": "Denim & Apparel",
+    "Category": ["Denim", "Apparel"],
     "CO2 Emitted (tons/year)": 1894149.4,
     "Water Usage (million liters/year)": 39830.82,
     "Electricity Usage (GWh/year)": 539.1,
@@ -235,7 +235,7 @@
   },
   {
     "Shop Name": "Zara",
-    "Category": "Fast Fashion",
+    "Category": ["Fast Fashion"],
     "CO2 Emitted (tons/year)": 362996.46,
     "Water Usage (million liters/year)": 35037.07,
     "Electricity Usage (GWh/year)": 719.59,
@@ -244,7 +244,7 @@
   },
   {
     "Shop Name": "Patagonia",
-    "Category": "Outdoor & Ethical Apparel",
+    "Category": ["Outdoor Apparel" "Ethical Apparel"],
     "CO2 Emitted (tons/year)": 1275992.54,
     "Water Usage (million liters/year)": 33658.45,
     "Electricity Usage (GWh/year)": 4761.5,
@@ -253,7 +253,7 @@
   },
   {
     "Shop Name": "Chanel",
-    "Category": "Luxury Fashion",
+    "Category": ["Luxury Fashion"],
     "CO2 Emitted (tons/year)": 1456113.16,
     "Water Usage (million liters/year)": 49482.52,
     "Electricity Usage (GWh/year)": 6617.11,
@@ -262,7 +262,7 @@
   },
   {
     "Shop Name": "Tommy Hilfiger",
-    "Category": "Casual & Luxury Apparel",
+    "Category": ["Casual Apparel", "Luxury Apparel"],
     "CO2 Emitted (tons/year)": 199386.14,
     "Water Usage (million liters/year)": 19529.87,
     "Electricity Usage (GWh/year)": 1055.05,
@@ -271,7 +271,7 @@
   },
   {
     "Shop Name": "Gucci",
-    "Category": "Luxury Fashion",
+    "Category": ["Luxury Fashion"],
     "CO2 Emitted (tons/year)": 1371576.38,
     "Water Usage (million liters/year)": 12711.57,
     "Electricity Usage (GWh/year)": 5046.57,
@@ -280,7 +280,7 @@
   },
   {
     "Shop Name": "LVMH",
-    "Category": "Luxury Conglomerate",
+    "Category": ["Luxury Conglomerate"],
     "CO2 Emitted (tons/year)": 1081939.11,
     "Water Usage (million liters/year)": 28907.47,
     "Electricity Usage (GWh/year)": 1517.16,
@@ -289,7 +289,7 @@
   },
   {
     "Shop Name": "Massimo Dutti",
-    "Category": "Luxury Apparel",
+    "Category": ["Luxury Apparel"],
     "CO2 Emitted (tons/year)": 1548962.09,
     "Water Usage (million liters/year)": 11425.38,
     "Electricity Usage (GWh/year)": 9705.24,
@@ -298,7 +298,7 @@
   },
   {
     "Shop Name": "Dr. Martens",
-    "Category": "Footwear",
+    "Category": ["Footwear"],
     "CO2 Emitted (tons/year)": 536097.8,
     "Water Usage (million liters/year)": 24930.49,
     "Electricity Usage (GWh/year)": 2738.55,
@@ -307,7 +307,7 @@
   },
   {
     "Shop Name": "Balenciaga",
-    "Category": "Luxury Fashion",
+    "Category": ["Luxury Fashion"],
     "CO2 Emitted (tons/year)": 1973963.83,
     "Water Usage (million liters/year)": 9357.91,
     "Electricity Usage (GWh/year)": 1137.64,
@@ -316,7 +316,7 @@
   },
   {
     "Shop Name": "Timberland",
-    "Category": "Outdoor Footwear",
+    "Category": ["Outdoor Apparel"],
     "CO2 Emitted (tons/year)": 1956846.82,
     "Water Usage (million liters/year)": 36993.03,
     "Electricity Usage (GWh/year)": 2111.67,
@@ -325,7 +325,7 @@
   },
   {
     "Shop Name": "Under Armour",
-    "Category": "Activewear",
+    "Category": ["Activewear"],
     "CO2 Emitted (tons/year)": 1507897.43,
     "Water Usage (million liters/year)": 20806.44,
     "Electricity Usage (GWh/year)": 9732.82,
@@ -334,7 +334,7 @@
   },
   {
     "Shop Name": "North Face",
-    "Category": "Outdoor Apparel",
+    "Category": ["Outdoor Apparel"],
     "CO2 Emitted (tons/year)": 573358.84,
     "Water Usage (million liters/year)": 31547.23,
     "Electricity Usage (GWh/year)": 9254.14,
@@ -343,7 +343,7 @@
   },
   {
     "Shop Name": "Vans",
-    "Category": "Skatewear & Sneakers",
+    "Category": ["Footwear"],
     "CO2 Emitted (tons/year)": 1102983.52,
     "Water Usage (million liters/year)": 30101.77,
     "Electricity Usage (GWh/year)": 2598.51,
@@ -352,7 +352,7 @@
   },
   {
     "Shop Name": "Prada",
-    "Category": "Luxury Fashion",
+    "Category": ["Luxury Fashion"],
     "CO2 Emitted (tons/year)": 1297651.29,
     "Water Usage (million liters/year)": 41969.78,
     "Electricity Usage (GWh/year)": 218.83,
@@ -361,7 +361,7 @@
   },
   {
     "Shop Name": "Pull & Bear",
-    "Category": "Fast Fashion",
+    "Category": ["Fast Fashion"],
     "CO2 Emitted (tons/year)": 294032.18,
     "Water Usage (million liters/year)": 34826.46,
     "Electricity Usage (GWh/year)": 1879.14,
@@ -370,7 +370,7 @@
   },
   {
     "Shop Name": "Fendi",
-    "Category": "Luxury Fashion",
+    "Category": ["Luxury Fashion"],
     "CO2 Emitted (tons/year)": 914751.05,
     "Water Usage (million liters/year)": 7805.85,
     "Electricity Usage (GWh/year)": 4551.58,
@@ -379,7 +379,7 @@
   },
   {
     "Shop Name": "Saint Laurent",
-    "Category": "Luxury Fashion",
+    "Category": ["Luxury Fashion"],
     "CO2 Emitted (tons/year)": 1131695.81,
     "Water Usage (million liters/year)": 5256.39,
     "Electricity Usage (GWh/year)": 3185.46,
@@ -388,7 +388,7 @@
   },
   {
     "Shop Name": "Dior",
-    "Category": "Luxury Fashion",
+    "Category": ["Luxury Fashion"],
     "CO2 Emitted (tons/year)": 261786.61,
     "Water Usage (million liters/year)": 35317.48,
     "Electricity Usage (GWh/year)": 8984.82,
