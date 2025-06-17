@@ -14,7 +14,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "csvjson.json",
+        "data.json",
         "images/*.png"
       ],
       "matches": ["<all_urls>"]
