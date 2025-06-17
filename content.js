@@ -133,9 +133,10 @@ Object.assign(leafBtn.style, {
 
       companies = companies.sort((a, b) => parseFloat(b.ecoScore) - parseFloat(a.ecoScore));
       companies.forEach((company) => {
-        const starCount = Math.round(company["ecoScore"] / 10); // 5-star scale
+        
+        const starCount = Math.round(company["ecoScore"] / 10); // 10 star scale
         const stars = "⭐️".repeat(starCount) + "☆".repeat(10 - starCount);
-
+        console.log(company["ecoScore"], starCount)
         const card = document.createElement("div");
         card.style.marginBottom = "15px";
         card.style.borderBottom = "1px solid #ccc";
@@ -165,7 +166,7 @@ Object.assign(leafBtn.style, {
     const rank = sorted.findIndex(b => b.name.toLowerCase() === entry["Shop Name"].toLowerCase()) + 1;
     const total = sorted.length;
     const averageScore = Math.round(sorted.reduce((acc, b) => acc + b.score, 0) / total);
-    const starCount = Math.round(ecoScore / 10); // 5-star scale
+    const starCount = Math.round(ecoScore / 10); // 10 star scale
     const stars = "⭐️".repeat(starCount) + "☆".repeat(10 - starCount);
 
     let companyInfo = `
@@ -182,7 +183,7 @@ Object.assign(leafBtn.style, {
         position:absolute; top:8px; right:10px; border:none; background:none;
         font-size:16px; cursor:pointer; color:#666;">❌</button>
 
-      <h3 style="margin-top:0; font-size:18px; color:#2e7d32;"><a href=${entry["URL"]}>${entry["Shop Name"]}</a></h3>
+      <h3 style="margin-top:0; font-size:18px; color:#2e7d32;"><a href=https://${entry["URL"]}>${entry["Shop Name"]}</a></h3>
       <p style="margin-bottom:12px;"><em>${entry["Category"]}</em></p>
 
       <div style="margin:15px; line-height:1.8;">
@@ -209,8 +210,8 @@ Object.assign(leafBtn.style, {
         font-weight: 600;
       ">🌿 Alternatives</button>
 
-            <button id="greenwashBtn" style="
-            flex: 1;
+        <button id="greenwashBtn" style="
+        flex: 1;
         padding: 6px 10px;
         border-radius: 6px;
         background-color: #fff3e0;
@@ -220,7 +221,23 @@ Object.assign(leafBtn.style, {
         color: #ef6c00;
         font-weight: 600;  
         ">🧪 Greenwashing</button>
+
+        
+
         </div>
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+        <button id="removeBtn" style="
+        flex: 1;
+        padding: 6px 10px;
+        border-radius: 6px;
+        background-color: #e0f2f1;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+        color: #00796b;
+        font-weight: 600;
+        text-align: center; 
+      ">❌ Remove Highlights</button></div>
         `;
 
 
@@ -228,8 +245,10 @@ Object.assign(leafBtn.style, {
     document.body.appendChild(panel);
     document.getElementById("closeBtn").onclick = () => panel.remove();
     document.getElementById("altBtn").onclick = () => alt();
+    document.getElementById("removeBtn").onclick = () => removeMark();
 
     document.getElementById("greenwashBtn").onclick = () => {
+      highlightAll();
       const existing = document.getElementById("greenwashReport");
       if (existing) {
         existing.remove();
@@ -419,7 +438,7 @@ const patterns = [
     category: "Unspecified Quantity Claims",
     description: "Vague terms that don’t commit to a precise number (e.g. “up to”, “almost”).",
     severity: "warning",
-    regex: /\b(?:at least|up to|approximately|around|nearly|over|under|more than|less than|only|just)\b/gi
+    regex: /\b(?:at least|up to|approximately|around|nearly|under|more than|less than|only|just)\b/gi
   },
   {
     category: "Vague sustainability keywords",
@@ -429,16 +448,7 @@ const patterns = [
   }
 ];
 
-// 2) Build findings
-const text = document.body.innerText;
-const findings = patterns
-  .map(({ category, description, severity, regex }) => {
-    const matches = text.match(regex);
-    return matches
-      ? { category, description, severity, hits: [...new Set(matches)] }
-      : null;
-  })
-  .filter(Boolean);
+
 
 // 3) Safe highlighting via TreeWalker
 function highlightText(term, className) {
@@ -473,11 +483,26 @@ function highlightText(term, className) {
     textNode.parentNode.replaceChild(frag, textNode);
   });
 }
-
-findings.forEach(({ hits, severity }) => {
-  hits.forEach(term => highlightText(term, `gw-${severity}`));
-});
-
+var highlighted = false;
+// 2) Build findings
+function highlightAll(){
+  if (!highlighted){
+    const text = document.body.innerText;
+    const findings = patterns
+      .map(({ category, description, severity, regex }) => {
+        const matches = text.match(regex);
+        return matches
+          ? { category, description, severity, hits: [...new Set(matches)] }
+          : null;
+      })
+      .filter(Boolean);
+    findings.forEach(({ hits, severity }) => {
+      hits.forEach(term => highlightText(term, `gw-${severity}`));
+    });
+    highlighted = true;
+  }
+}
+highlightAll()
 // 4) Messaging for popup.js (unchanged)
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
@@ -485,3 +510,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     sendResponse({ findings });
   }
 });
+function removeMark(){
+  let a = document.querySelectorAll("mark")
+  highlighted = false;
+  for (let i=0;i<a.length;i++){
+    a[i].parentElement.innerHTML = a[i].parentElement.innerHTML.replace('<mark class="', "").replace('</mark>', "").replace(a[i].className+'">', "")
+  }
+}
