@@ -22,24 +22,46 @@ const weights = {
     return;
   }
 
+  function getBasePanelStyles() {
+  return {
+    position: "fixed",
+    top: "160px",
+    right: "20px",
+    background: "#f9fff6",
+    padding: "16px",
+    borderLeft: "5px solid #74c67a",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+    borderRadius: "12px",
+    maxWidth: "280px",
+    zIndex: "9999",
+    fontFamily: "Segoe UI, sans-serif",
+    overflowY: "auto",
+    maxHeight: "400px",
+  };
+}
+
   console.log("✅ Found entry:", entry);
 
   const leafBtn = document.createElement("button");
   leafBtn.textContent = "🍃";
+
   Object.assign(leafBtn.style, {
-    position: "fixed",
-    top: "100px",
-    right: "20px",
-    zIndex: "9999",
-    background: "#e6f4ea",
-    color: "#4CAF50",
-    border: "2px solid #4CAF50",
-    borderRadius: "50%",
-    width: "40px",
-    height: "40px",
-    fontSize: "20px",
-    cursor: "pointer",
-  });
+  position: "fixed",
+  top: "100px",
+  right: "20px",
+  zIndex: "9999",
+  background: "#e6f4ea",
+  color: "#4CAF50",
+  border: "2px solid #4CAF50",
+  borderRadius: "50%",
+  width: "40px",
+  height: "40px",
+  fontSize: "20px",
+  cursor: "pointer",
+});
+
+  
+
   leafBtn.title = "View Sustainability Info";
   document.body.appendChild(leafBtn);
 
@@ -48,22 +70,7 @@ leafBtn.onclick = () => {
 
     const panel = document.createElement("div");
     panel.id = "reportPanel";
-    Object.assign(panel.style, {
-      position: "fixed",
-      top: "160px",
-      right: "20px",
-      background: "#f9fff6",
-      padding: "16px",
-      
-      borderLeft: "5px solid #74c67a",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-      borderRadius: "12px",
-      maxWidth: "280px",
-
-      zIndex: "9999",
-      fontFamily: "Segoe UI, sans-serif",
-      animation: "slideIn 0.4s ease-out",
-    });
+    Object.assign(panel.style, getBasePanelStyles());
 
     const scoredData = data.map(b => ({
       name: b["Shop Name"],
@@ -73,47 +80,81 @@ leafBtn.onclick = () => {
       let altCompanies = filterAlternative(entry, data);
       let companies = scoreComparison(altCompanies, entry, data);
       panel.innerHTML = `
-      <style>
-      .altdiv{
-      max-height:300px;
-      overflow-y:auto;
-      }
-      .backBtn{
-        position:absolute; top:8px; left:10px; border:2px;background:none;
-        font-size:16px; cursor:pointer; color:#666;
-      }
+  <style>
+    .altdiv {
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
 
-      </style>
-      <body> </body>
-      <div>
-      <button id="closeBtn" style="
-        position:absolute; top:8px; right:10px; border:none; background:none;
-        font-size:16px; cursor:pointer; color:#666;">❌</button>
-      <button id="backBtn">Back</button>
-        </div>
-      <div class="altdiv">
-      <ul id="alts">
-        
-      </ul></div> 
-    `;
+    .alt-card {
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    .alt-card h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #2e7d32;
+    }
+
+    .alt-card div {
+      margin-top: 4px;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .header-bar button {
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      color: #666;
+    }
+  </style>
+
+  <div class="header-bar">
+    <button id="backBtn">← Back</button>
+    <button id="closeBtn">❌</button>
+  </div>
+
+  <div class="altdiv" id="alts"></div>
+`;
+Object.assign(panel.style, getBasePanelStyles());
+
+
+
+
+
       
-      var list = document.getElementById("alts")
-      companies.forEach((company) => {
-        const ecoScore = computeEcoScore(company, data);
-        const starCount = Math.round(ecoScore / 20); // 5-star scale
-        const stars = "⭐️".repeat(starCount) + "☆".repeat(5 - starCount);
-        let li = document.createElement("li")
-        
-        list.appendChild(li).innerHTML = `
-        <h3 style="margin-top:0; font-size:18px; color:#2e7d32;">${company["Shop Name"]}</h3>
-        <li><strong>EcoScore: ${ecoScore}/100</strong> <br/>${stars}</li>
-        <li><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> CO₂: ${company["CO2"]} Kg/Unit</li>
-        <li><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> Water: ${company["Water"]} L/Unit</li>
-        <li><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> Electricity: ${company["Electricity"]} Wh/Unit</li>
-        <li><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> Waste: ${company["Waste"]} Kg/Unit</li>
-        <li><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> ISO Certified: ${company["ISO Certified"]}</li>
-        <li></li>`
-      });
+      var list = document.getElementById("alts");
+  companies.forEach((company) => {
+  const ecoScore = computeEcoScore(company, data);
+  const starCount = Math.round(ecoScore / 20); // 5-star scale
+  const stars = "⭐️".repeat(starCount) + "☆".repeat(5 - starCount);
+  
+  const card = document.createElement("div");
+  card.style.marginBottom = "15px";
+  card.style.borderBottom = "1px solid #ccc";
+  card.style.paddingBottom = "10px";
+  card.innerHTML = `
+    <h3 style="margin:0; font-size:18px; color:#2e7d32;">${company["Shop Name"]}</h3>
+    <div><strong>EcoScore: ${ecoScore}/100</strong><br/>${stars}</div>
+    <div><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px;"> CO₂: ${company["CO2"]} Kg/Unit</div>
+    <div><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px;"> Water: ${company["Water"]} L/Unit</div>
+    <div><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px;"> Electricity: ${company["Electricity"]} Wh/Unit</div>
+    <div><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px;"> Waste: ${company["Waste"]} Kg/Unit</div>
+    <div><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px;"> ISO Certified: ${company["ISO Certified"]}</div>
+  `;
+  list.appendChild(card);
+});
+
       document.getElementById("backBtn").onclick = () =>  {
         panel.innerHTML = companyInfo;
         document.getElementById("closeBtn").onclick = () => panel.remove();
@@ -148,26 +189,99 @@ leafBtn.onclick = () => {
       <h3 style="margin-top:0; font-size:18px; color:#2e7d32;">${entry["Shop Name"]}</h3>
       <p style="margin-bottom:12px;"><em>${entry["Category"]}</em></p>
 
-      <ul style="list-style:none; padding:0; margin:15px; line-height:1.8;">
-        <li><strong>EcoScore: ${ecoScore}/100</strong> <br/>${stars}</li>
-        <li><strong>Ranking:</strong> #${rank} of ${total}</li>
-        <li><strong>Average Score:</strong> ${averageScore}/100</li>
-        <li><strong>Top Brands:</strong> ${topBrands.join(", ")}</li>
-        <li><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> CO₂: ${entry["CO2"]} Kg/Unit</li>
-        <li><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> Water: ${entry["Water"]} L/Unit</li>
-        <li><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> Electricity: ${entry["Electricity"]} Wh/Unit</li>
-        <li><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> Waste: ${entry["Waste"]} Kg/Unit</li>
-        <li><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> ISO Certified: ${entry["ISO Certified"]}</li>
+      <div style="margin:15px; line-height:1.8;">
+      <div><strong>EcoScore: ${ecoScore}/100</strong> <br/>${stars}</div>
+      <div><strong>Ranking:</strong> #${rank} of ${total}</div>
+      <div><strong>Average Score:</strong> ${averageScore}/100</div>
+      <div><strong>Top Brands:</strong> ${topBrands.join(", ")}</div>
+      <div><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> CO₂: ${entry["CO2"]} Kg/Unit</div>
+      <div><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> Water: ${entry["Water"]} L/Unit</div>
+      <div><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> Electricity: ${entry["Electricity"]} Wh/Unit</div>
+      <div><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> Waste: ${entry["Waste"]} Kg/Unit</div>
+      <div><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> ISO Certified: ${entry["ISO Certified"]}</div>
+      </div>
 
-        </ul>
+      <div style="display: flex; gap: 8px; margin-top: 10px;">
         <button id="altBtn" style="
-        display: grid; place-items: center; border-radius:5px; background:none; margin-top:5px;
-        font-size:16px; cursor:pointer; color:#666;">Alternatives</button>
+    flex: 1;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background-color: #e0f2f1;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    color: #00796b;
+    font-weight: 600;
+  ">🌿 Alternatives</button>
+
+        <button id="greenwashBtn" style="
+        flex: 1;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background-color: #fff3e0;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    color: #ef6c00;
+    font-weight: 600;  
+    ">🧪 Greenwashing</button>
+    </div>
     `;
+    
+
     panel.innerHTML = companyInfo
     document.body.appendChild(panel);
     document.getElementById("closeBtn").onclick = () => panel.remove();
     document.getElementById("altBtn").onclick = ()=> alt();
+
+    document.getElementById("greenwashBtn").onclick = () => {
+  const existing = document.getElementById("greenwashReport");
+  if (existing) {
+    existing.remove();
+    return;
+  }
+
+  const resultsPanel = document.createElement("div");
+  resultsPanel.id = "greenwashReport";
+  resultsPanel.style.marginTop = "10px";
+  resultsPanel.style.maxHeight = "200px";
+  resultsPanel.style.overflowY = "auto";
+
+  const hasFindings = findings.length > 0;
+  resultsPanel.innerHTML = `
+    <div style="
+      margin-bottom:10px; padding:8px 10px; border-radius:6px;
+      background-color: ${hasFindings ? "#fff3e0" : "#e8f5e9"};
+      border-left: 4px solid ${hasFindings ? "#ef6c00" : "#4CAF50"};
+      font-weight: bold;
+      color: ${hasFindings ? "#ef6c00" : "#2e7d32"};
+    ">
+      ${hasFindings
+        ? "⚠️ Greenwashing patterns found:"
+        : "✅ No greenwashing patterns detected."}
+    </div>
+    <ul style="list-style:none; padding:0;"></ul>
+  `;
+
+  const ul = resultsPanel.querySelector("ul");
+  findings.forEach(({ category, description, hits, severity }) => {
+    const li = document.createElement("li");
+    li.style.marginBottom = "10px";
+    li.style.fontSize = "14px";
+    li.style.color = severity === "issue" ? "#c62828" :
+                     severity === "warning" ? "#ef6c00" : "#2e7d32";
+    li.innerHTML = `
+      <strong>${category}</strong><br>
+      <em style="font-size:12px">${description}</em><br>
+      Keywords: ${hits.join(", ")}
+    `;
+    ul.appendChild(li);
+  });
+
+  panel.appendChild(resultsPanel);
+};
+
+
   };
 })();
 
