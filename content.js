@@ -42,7 +42,8 @@ const weights = {
   leafBtn.title = "View Sustainability Info";
   document.body.appendChild(leafBtn);
 
-  leafBtn.onclick = () => {
+  leafBtn.onclick = () => createPopup();
+  function createPopup(){
     if (document.getElementById("reportPanel")) return;
 
     const panel = document.createElement("div");
@@ -93,7 +94,7 @@ const weights = {
         <li><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> ISO Certified: ${company["ISO Certified"]}</li>
         <li></li>`
       });
-      document.getElementById("backBtn").onclick = () => { panel.innerHTML = companyInfo };
+      document.getElementById("backBtn").onclick = () =>  createPopup();
     };
     const sorted = scoredData.sort((a, b) => b.score - a.score);
     const ecoScore = computeEcoScore(entry, data);
