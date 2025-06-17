@@ -130,9 +130,14 @@ const weights = {
       Object.assign(panel.style, getBasePanelStyles());
 
       var list = document.getElementById("alts");
+        companies.forEach((company) => {
+          const ecoScore = computeEcoScore(company, data);
+          company["ecoScore"] = ecoScore;
+        })
+
+      companies = companies.sort((a, b) => parseFloat(b.ecoScore) - parseFloat(a.ecoScore));
       companies.forEach((company) => {
-        const ecoScore = computeEcoScore(company, data);
-        const starCount = Math.round(ecoScore / 10); // 5-star scale
+        const starCount = Math.round(company["ecoScore"] / 10); // 5-star scale
         const stars = "⭐️".repeat(starCount) + "☆".repeat(10 - starCount);
 
         const card = document.createElement("div");
@@ -141,7 +146,7 @@ const weights = {
         card.style.paddingBottom = "10px";
         card.innerHTML = `
         <h3 style="margin:0; font-size:18px; color:#2e7d32;"><a href=https://${company["URL"]}>${company["Shop Name"]}</a></h3>
-        <div><strong>EcoScore: ${ecoScore}/100</strong><br/>${stars}</div>
+        <div><strong>EcoScore: ${company["ecoScore"]}/100</strong><br/>${stars}</div>
         <div><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px;"> CO₂: ${company["CO2"]} Kg/Unit</div>
         <div><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px;"> Water: ${company["Water"]} L/Unit</div>
         <div><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px;"> Electricity: ${company["Electricity"]} Wh/Unit</div>
