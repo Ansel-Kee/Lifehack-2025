@@ -2,17 +2,16 @@ console.log("🍃 content.js loaded");
 
 (async () => {
   const data = await fetch(chrome.runtime.getURL("csvjson.json")).then(res => res.json());
-  console.log("json loaded");
 
   const shop = await detectBrandFromPage(); // now async
   if (!shop) {
-    console.warn("❌ No shop found");
+    console.warn("No shop found");
     return;
   }
 
   const entry = findBrandData(shop, data);
   if (!entry) {
-    console.warn(`❌ No sustainability data found for brand: ${shop}`);
+    console.warn(`No sustainability data found for brand: ${shop}`);
     return;
   }
 
@@ -56,8 +55,7 @@ console.log("🍃 content.js loaded");
       fontFamily: "Segoe UI, sans-serif",
       animation: "slideIn 0.4s ease-out",
     });
-
-    panel.innerHTML = `
+    companyInfo = `
       <style>
         @keyframes slideIn {
           from { opacity: 0; transform: translateY(10px); }
@@ -77,11 +75,46 @@ console.log("🍃 content.js loaded");
         <li><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> <strong>${entry["Electricity Usage (GWh/year)"]} GWh/year</strong></li>
         <li><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> <strong>${entry["Waste Generated (tons/year)"]} tons/year</strong></li>
         <li><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> <strong>ISO Certified: ${entry["ISO Certified"]}</strong></li>
-      </ul>
+        <li></li>
+        </ul>
+      <p></p>
+      <button id="altBtn" style="
+        position:absolute; bottom:8px; right:70px; border-radius:5px; background:none;
+        font-size:16px; cursor:pointer; color:#666;">Alternatives</button>
     `;
+    panel.innerHTML = companyInfo
 
     document.body.appendChild(panel);
     document.getElementById("closeBtn").onclick = () => panel.remove();
+
+    document.getElementById("altBtn").onclick = () => {
+      let altCompanies = filterAlternative(entry, data);
+      let companies = scoreComparison(altCompanies, entry);
+      panel.innerHTML = `
+    <button id="closeBtn" style="
+        position:absolute; top:8px; right:10px; border:none; background:none;
+        font-size:16px; cursor:pointer; color:#666;">❌</button>
+      <button id="backBtn" style="
+        position:absolute; top:8px; left:10px; border:none; background:none;
+        font-size:16px; cursor:pointer; color:#666;">Back</button>
+      <ul id="alts" style="nav ul{overflow:hidden; overflow-y:scroll;}">
+        
+      </ul>
+    `;
+      document.getElementById("backBtn").onclick = () => { panel.innerHTML = companyInfo };
+      var list = document.getElementById("alts")
+      console.log(companies)
+      companies.forEach((company) => {
+        let li = `<li><strong>${company["Shop Name"]}</strong></li>
+        <li>CO2 Emitted: <strong>${company["CO2 Emitted (tons/year)"]}</strong></li>
+        <li>Water Usage: <strong>${company["Water Usage (million liters/year)"]}</strong></li>
+        <li>Electricity Usage: <strong>${company["Electricity Usage (GWh/year)"]}</strong></li>
+        <li>Waste Generated: <strong>${company["Waste Generated (tons/year)"]}</strong></li>
+        <li>ISO Certified: <strong>Yes</strong></li>`
+        list.append(li)
+        console.log(list)
+      });
+    };
   };
 })();
 
@@ -134,9 +167,88 @@ function waitForElement(selector, timeout = 5000) {
 
     observer.observe(document.body, { childList: true, subtree: true });
 
-    setTimeout(() => {
-      observer.disconnect();
-      reject(new Error(`Timed out waiting for ${selector}`));
-    }, timeout);
+    // setTimeout(() => {
+    //   observer.disconnect();
+    //   reject(new Error(`Timed out waiting for ${selector}`));
+    // }, timeout);
   });
+}
+
+function filterAlternative(entry, csvData) {
+  const categories = entry.Category.split(" & ");
+  console.log(categories)
+  const sameCategoryCompany = [];
+  csvData.forEach(row => {
+    for (let i = 0; i < row.Category.length; i++) {
+      if (categories.includes(row.Category[i])) {
+        sameCategoryCompany.append(row);
+        break;
+      }
+    }
+  });
+
+
+  console.log(sameCategoryCompany)
+
+  const filteredCompanies = sameCategoryCompany.filter(row =>
+    row["Shop Name"] !== entry["Shop Name"]
+  );
+
+  return filteredCompanies;
+}
+
+function scoreComparison(filteredCompanies, entry) {
+  const betterCompanies = [];
+
+  const metrics = [
+    { key: 'CO2 Emitted (tons/year)', weight: 0.2 },
+    { key: 'Water Usage (million liters/year)', weight: 0.2 },
+    { key: 'Electricity Usage (GWh/year)', weight: 0.2 },
+    { key: 'Waste Generated (tons/year)', weight: 0.2 }
+  ];
+
+  for (let i = 0; i < filteredCompanies.length; i++) {
+    const company = filteredCompanies[i];
+    let totalWeightedScore = 0;
+    let valid = true;
+
+    for (let j = 0; j < metrics.length; j++) {
+      const key = metrics[j].key;
+      const weight = metrics[j].weight;
+
+      const entryVal = parseFloat(entry[key]);
+      const companyVal = parseFloat(company[key]);
+
+      if (isNaN(entryVal) || isNaN(companyVal)) {
+        valid = false;
+        break;
+      }
+
+      const diff = (entryVal - companyVal) / entryVal;
+      totalWeightedScore += diff * weight;
+    }
+
+    // ISO Certification Comparison
+    let isoScore = 0;
+    if (company['ISO Certified'] !== entry['ISO Certified']) {
+      if (company['ISO Certified'] === "Yes") {
+        isoScore = 1 * 0.2; // full weight if better
+      }
+    }
+    totalWeightedScore += isoScore;
+
+    if (valid && totalWeightedScore > 0) {
+      betterCompanies.push({
+        "Shop Name": company["Shop Name"],
+        "Score": totalWeightedScore.toFixed(4),
+        "CO2 Emitted (tons/year)": company["CO2 Emitted (tons/year)"],
+        "Water Usage (million liters/year)": company["Water Usage (million liters/year)"],
+        "Electricity Usage (GWh/year)": company["Electricity Usage (GWh/year)"],
+        "Waste Generated (tons/year)": company["Waste Generated (tons/year)"],
+        "Domain": "google.com"
+      });
+    }
+  }
+
+  return betterCompanies;
 }
