@@ -137,9 +137,10 @@ const weights = {
 
       companies = companies.sort((a, b) => parseFloat(b.ecoScore) - parseFloat(a.ecoScore));
       companies.forEach((company) => {
-        const starCount = Math.round(company["ecoScore"] / 10); // 5-star scale
+        
+        const starCount = Math.round(company["ecoScore"] / 10); // 10 star scale
         const stars = "⭐️".repeat(starCount) + "☆".repeat(10 - starCount);
-
+        console.log(company["ecoScore"], starCount)
         const card = document.createElement("div");
         card.style.marginBottom = "15px";
         card.style.borderBottom = "1px solid #ccc";
@@ -169,7 +170,7 @@ const weights = {
     const rank = sorted.findIndex(b => b.name.toLowerCase() === entry["Shop Name"].toLowerCase()) + 1;
     const total = sorted.length;
     const averageScore = Math.round(sorted.reduce((acc, b) => acc + b.score, 0) / total);
-    const starCount = Math.round(ecoScore / 10); // 5-star scale
+    const starCount = Math.round(ecoScore / 10); // 10 star scale
     const stars = "⭐️".repeat(starCount) + "☆".repeat(10 - starCount);
 
     let companyInfo = `
@@ -186,7 +187,7 @@ const weights = {
         position:absolute; top:8px; right:10px; border:none; background:none;
         font-size:16px; cursor:pointer; color:#666;">❌</button>
 
-      <h3 style="margin-top:0; font-size:18px; color:#2e7d32;"><a href=${entry["URL"]}>${entry["Shop Name"]}</a></h3>
+      <h3 style="margin-top:0; font-size:18px; color:#2e7d32;"><a href=https://${entry["URL"]}>${entry["Shop Name"]}</a></h3>
       <p style="margin-bottom:12px;"><em>${entry["Category"]}</em></p>
 
       <div style="margin:15px; line-height:1.8;">
