@@ -26,7 +26,7 @@ const weights = {
   function getBasePanelStyles() {
     return {
       position: "fixed",
-      top: "160px",
+      top: "180px",
       right: "20px",
       background: "#f9fff6",
       padding: "16px",
@@ -43,24 +43,20 @@ const weights = {
 
   console.log("✅ Found entry:", entry);
 
-  const leafBtn = document.createElement("button");
-  leafBtn.textContent = "🍃";
+const leafBtn = document.createElement("img");
+leafBtn.src = chrome.runtime.getURL("images/ecootter.png");
+leafBtn.alt = "Eco Otter Button";
+leafBtn.title = "View Sustainability Info";
 
-  Object.assign(leafBtn.style, {
-    position: "fixed",
-    top: "100px",
-    right: "20px",
-    zIndex: "9999",
-    background: "#e6f4ea",
-    color: "#4CAF50",
-    border: "2px solid #4CAF50",
-    borderRadius: "50%",
-    width: "40px",
-    height: "40px",
-    fontSize: "20px",
-    cursor: "pointer",
-  });
-
+Object.assign(leafBtn.style, {
+  position: "fixed",
+  top: "100px",
+  right: "20px",
+  zIndex: "9999",
+  width: "100px",        
+  height: "100px",
+  cursor: "pointer"
+});
 
 
   leafBtn.title = "View Sustainability Info";
