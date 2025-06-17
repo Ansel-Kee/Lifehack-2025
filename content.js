@@ -2,16 +2,17 @@ console.log("🍃 content.js loaded");
 
 (async () => {
   const data = await fetch(chrome.runtime.getURL("csvjson.json")).then(res => res.json());
+  console.log("json loaded");
 
-  const shop = await detectBrandFromPage(); // now async
+  const shop = await detectBrandFromPage();
   if (!shop) {
-    console.warn("No shop found");
+    console.warn("❌ No shop found");
     return;
   }
 
   const entry = findBrandData(shop, data);
   if (!entry) {
-    console.warn(`No sustainability data found for brand: ${shop}`);
+    console.warn(`❌ No sustainability data found for brand: ${shop}`);
     return;
   }
 
@@ -36,7 +37,45 @@ console.log("🍃 content.js loaded");
   leafBtn.title = "View Sustainability Info";
   document.body.appendChild(leafBtn);
 
-  leafBtn.onclick = () => {
+  
+// === NORMALISATION HELPERS ===
+function getMinMax(key) {
+  const values = data.map(b => parseFloat(b[key]));
+  return { min: Math.min(...values), max: Math.max(...values) };
+}
+
+function normalise(value, min, max) {
+  return 1 - (value - min) / (max - min); // lower is better
+}
+
+// === WEIGHTS (EDITABLE) ===
+const weights = {
+  CO2: 0.4,
+  Water: 0.2,
+  Electricity: 0.2,
+  Waste: 0.1,
+  ISO: 0.1
+};
+
+// === SCORE CALCULATION ===
+function computeEcoScore(entry) {
+  const keys = ["CO2", "Water", "Electricity", "Waste"];
+  let score = 0;
+
+  for (const key of keys) {
+    const { min, max } = getMinMax(key);
+    const raw = parseFloat(entry[key]);
+    const norm = normalise(raw, min, max);
+    score += weights[key] * norm;
+  }
+
+  const isoScore = (entry["ISO Certified"]?.toLowerCase() === "yes") ? 1 : 0;
+  score += weights.ISO * isoScore;
+
+  return Math.round(score * 100);
+}
+
+leafBtn.onclick = () => {
     if (document.getElementById("reportPanel")) return;
 
     const panel = document.createElement("div");
@@ -50,12 +89,30 @@ console.log("🍃 content.js loaded");
       borderLeft: "5px solid #74c67a",
       boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
       borderRadius: "12px",
-      maxWidth: "260px",
+      maxWidth: "280px",
       zIndex: "9999",
       fontFamily: "Segoe UI, sans-serif",
       animation: "slideIn 0.4s ease-out",
     });
-    companyInfo = `
+
+    // Create a simple star rating from score
+    
+    const scoredData = data.map(b => ({
+      name: b["Shop Name"],
+      score: computeEcoScore(b)
+    }));
+
+    const sorted = scoredData.sort((a, b) => b.score - a.score);
+    const ecoScore = computeEcoScore(entry);
+    const rank = sorted.findIndex(b => b.name.toLowerCase() === entry["Shop Name"].toLowerCase()) + 1;
+    const total = sorted.length;
+    const averageScore = Math.round(sorted.reduce((acc, b) => acc + b.score, 0) / total);
+    const topBrands = sorted.slice(0, 3).map(b => b.name);
+    
+    const starCount = Math.round(ecoScore / 20); // 5-star scale
+    const stars = "⭐️".repeat(starCount) + "☆".repeat(5 - starCount);
+
+    panel.innerHTML = `
       <style>
         @keyframes slideIn {
           from { opacity: 0; transform: translateY(10px); }
@@ -70,59 +127,26 @@ console.log("🍃 content.js loaded");
       <p style="margin-bottom:12px;"><em>${entry["Category"]}</em></p>
 
       <ul style="list-style:none; padding:0; margin:0; line-height:1.8;">
-        <li><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> <strong>${entry["CO2 Emitted (tons/year)"]} tons/year</strong></li>
-        <li><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> <strong>${entry["Water Usage (million liters/year)"]} million liters/year</strong></li>
-        <li><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> <strong>${entry["Electricity Usage (GWh/year)"]} GWh/year</strong></li>
-        <li><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> <strong>${entry["Waste Generated (tons/year)"]} tons/year</strong></li>
-        <li><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> <strong>ISO Certified: ${entry["ISO Certified"]}</strong></li>
-        <li></li>
-        </ul>
-      <p></p>
-      <button id="altBtn" style="
-        position:absolute; bottom:8px; right:70px; border-radius:5px; background:none;
-        font-size:16px; cursor:pointer; color:#666;">Alternatives</button>
+        <li><strong>EcoScore: ${ecoScore}/100</strong> <br/>${stars}</li>
+        <li><strong>Ranking:</strong> #${rank} of ${total}</li>
+        <li><strong>Average Score:</strong> ${averageScore}/100</li>
+        <li><strong>Top Brands:</strong> ${topBrands.join(", ")}</li>
+        <li><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> CO₂: ${entry["CO2"]} tons/year</li>
+        <li><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> Water: ${entry["Water"]} million L/year</li>
+        <li><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> Electricity: ${entry["Electricity"]} GWh/year</li>
+        <li><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> Waste: ${entry["Waste"]} tons/year</li>
+        <li><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> ISO Certified: ${entry["ISO Certified"]}</li>
+      </ul>
     `;
-    panel.innerHTML = companyInfo
 
     document.body.appendChild(panel);
     document.getElementById("closeBtn").onclick = () => panel.remove();
-
-    document.getElementById("altBtn").onclick = () => {
-      let altCompanies = filterAlternative(entry, data);
-      let companies = scoreComparison(altCompanies, entry);
-      panel.innerHTML = `
-    <button id="closeBtn" style="
-        position:absolute; top:8px; right:10px; border:none; background:none;
-        font-size:16px; cursor:pointer; color:#666;">❌</button>
-      <button id="backBtn" style="
-        position:absolute; top:8px; left:10px; border:none; background:none;
-        font-size:16px; cursor:pointer; color:#666;">Back</button>
-      <ul id="alts" style="nav ul{overflow:hidden; overflow-y:scroll;}">
-        
-      </ul>
-    `;
-      document.getElementById("backBtn").onclick = () => { panel.innerHTML = companyInfo };
-      var list = document.getElementById("alts")
-      console.log(companies)
-      companies.forEach((company) => {
-        let li = `<li><strong>${company["Shop Name"]}</strong></li>
-        <li>CO2 Emitted: <strong>${company["CO2 Emitted (tons/year)"]}</strong></li>
-        <li>Water Usage: <strong>${company["Water Usage (million liters/year)"]}</strong></li>
-        <li>Electricity Usage: <strong>${company["Electricity Usage (GWh/year)"]}</strong></li>
-        <li>Waste Generated: <strong>${company["Waste Generated (tons/year)"]}</strong></li>
-        <li>ISO Certified: <strong>Yes</strong></li>`
-        list.append(li)
-        console.log(list)
-      });
-    };
   };
 })();
 
 async function detectBrandFromPage() {
   let url = window.location.host;
-  if (url.includes("www")) {
-    url = url.slice(url.indexOf(".") + 1);
-  }
+  if (url.includes("www")) url = url.slice(url.indexOf(".") + 1);
 
   if (url === "shopee.sg") {
     const el = await waitForElement(".fV3TIn");
@@ -145,9 +169,9 @@ async function detectBrandFromPage() {
   return null;
 }
 
-function findBrandData(shop, csvData) {
+function findBrandData(shop, data) {
   const cleanedShop = shop.toLowerCase().replace(/[\W_]+/g, "");
-  return csvData.find(row =>
+  return data.find(row =>
     cleanedShop.includes(row["Shop Name"].toLowerCase().replace(/[\W_]+/g, ""))
   );
 }
@@ -167,88 +191,94 @@ function waitForElement(selector, timeout = 5000) {
 
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // setTimeout(() => {
-    //   observer.disconnect();
-    //   reject(new Error(`Timed out waiting for ${selector}`));
-    // }, timeout);
+    setTimeout(() => {
+      observer.disconnect();
+      reject(new Error(`Timed out waiting for ${selector}`));
+    }, timeout);
   });
 }
 
-function filterAlternative(entry, csvData) {
-  const categories = entry.Category.split(" & ");
-  console.log(categories)
-  const sameCategoryCompany = [];
-  csvData.forEach(row => {
-    for (let i = 0; i < row.Category.length; i++) {
-      if (categories.includes(row.Category[i])) {
-        sameCategoryCompany.append(row);
-        break;
-      }
-    }
-  });
+// 1) Your patterns stay the same:
+const patterns = [
+  {
+    category: "Quantitative recycled-content",
+    description: "percentages like “X% recycled” that claim a concrete amount.",
+    severity: "issue",
+    regex: /\b\d+\s*%\s*recycled\b/gi
+  },
+  {
+    category: "Partial-component call-outs",
+    description: "Highlighting only one part (e.g. lining or insole) as recycled while ignoring the rest.",
+    severity: "warning",
+    regex: /\b(?:vamp|collar|tongue|lining|insole)\b.*\b(recycled)\b/gi
+  },
+  {
+    category: "Unspecified Quantity Claims",
+    description: "Vague terms that don’t commit to a precise number (e.g. “up to”, “almost”).",
+    severity: "warning",
+    regex: /\b(?:at least|up to|approximately|around|nearly|over|under|more than|less than|only|just)\b/gi
+  },
+  {
+    category: "Vague sustainability keywords",
+    description: "keywords without hard data (e.g. “slow fashion,” “upcycled”).",
+    severity: "issue",
+    regex: /\b(?:eco[-\s]?friendly|sustainable|natural|naturel|planet[-\s]?positive|future[-\s]?friendly|environmentally[-\s]?sound|eco[-\s]?conscious|environmentally responsible|eco[-\s]?innovation|slow[-\s]?fashion|organic\s+cotton|plant[-\s]?based\s+dyes?|fair[-\s]?trade|upcycled|cruelty[-\s]?free\s+leather|regenerative\s+agriculture|traceable\s+supply\s+chain|zero[-\s]?discharge|waterless\s+dyeing|non[-\s]?mulesed\s+wool|closed[-\s]?loop|low[-\s]?impact\s+fabric|recyclable\s+packaging)\b/gi
+  }
+];
 
+// 2) Build your findings
+const text = document.body.innerText;
+const findings = patterns
+  .map(({ category, description, severity, regex }) => {
+    const matches = text.match(regex);
+    return matches
+      ? { category, description, severity, hits: [...new Set(matches)] }
+      : null;
+  })
+  .filter(Boolean);
 
-  console.log(sameCategoryCompany)
-
-  const filteredCompanies = sameCategoryCompany.filter(row =>
-    row["Shop Name"] !== entry["Shop Name"]
+// 3) Safe highlighting via TreeWalker
+function highlightText(term, className) {
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false
   );
+  const regex = new RegExp(term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+  const toWrap = [];
 
-  return filteredCompanies;
-}
-
-function scoreComparison(filteredCompanies, entry) {
-  const betterCompanies = [];
-
-  const metrics = [
-    { key: 'CO2 Emitted (tons/year)', weight: 0.2 },
-    { key: 'Water Usage (million liters/year)', weight: 0.2 },
-    { key: 'Electricity Usage (GWh/year)', weight: 0.2 },
-    { key: 'Waste Generated (tons/year)', weight: 0.2 }
-  ];
-
-  for (let i = 0; i < filteredCompanies.length; i++) {
-    const company = filteredCompanies[i];
-    let totalWeightedScore = 0;
-    let valid = true;
-
-    for (let j = 0; j < metrics.length; j++) {
-      const key = metrics[j].key;
-      const weight = metrics[j].weight;
-
-      const entryVal = parseFloat(entry[key]);
-      const companyVal = parseFloat(company[key]);
-
-      if (isNaN(entryVal) || isNaN(companyVal)) {
-        valid = false;
-        break;
-      }
-
-      const diff = (entryVal - companyVal) / entryVal;
-      totalWeightedScore += diff * weight;
-    }
-
-    // ISO Certification Comparison
-    let isoScore = 0;
-    if (company['ISO Certified'] !== entry['ISO Certified']) {
-      if (company['ISO Certified'] === "Yes") {
-        isoScore = 1 * 0.2; // full weight if better
-      }
-    }
-    totalWeightedScore += isoScore;
-
-    if (valid && totalWeightedScore > 0) {
-      betterCompanies.push({
-        "Shop Name": company["Shop Name"],
-        "Score": totalWeightedScore.toFixed(4),
-        "CO2 Emitted (tons/year)": company["CO2 Emitted (tons/year)"],
-        "Water Usage (million liters/year)": company["Water Usage (million liters/year)"],
-        "Electricity Usage (GWh/year)": company["Electricity Usage (GWh/year)"],
-        "Waste Generated (tons/year)": company["Waste Generated (tons/year)"],
-        "Domain": "google.com"
-      });
+  let node;
+  while (node = walker.nextNode()) {
+    if (regex.test(node.nodeValue)) {
+      toWrap.push(node);
     }
   }
 
-  return betterCompanies;
+  toWrap.forEach(textNode => {
+    const frag = document.createDocumentFragment();
+    let last = 0;
+    textNode.nodeValue.replace(regex, (match, offset) => {
+      frag.appendChild(document.createTextNode(textNode.nodeValue.slice(last, offset)));
+      const mark = document.createElement('mark');
+      mark.className = className;
+      mark.textContent = match;
+      frag.appendChild(mark);
+      last = offset + match.length;
+    });
+    frag.appendChild(document.createTextNode(textNode.nodeValue.slice(last)));
+    textNode.parentNode.replaceChild(frag, textNode);
+  });
 }
+
+findings.forEach(({ hits, severity }) => {
+  hits.forEach(term => highlightText(term, `gw-${severity}`));
+});
+
+// 4) Messaging for popup.js (unchanged)
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+
+  if (msg.type === "REQUEST_FINDINGS") {
+    sendResponse({ findings });
+  }
+});
