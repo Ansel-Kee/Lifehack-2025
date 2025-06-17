@@ -500,9 +500,10 @@ function highlightAll(){
       hits.forEach(term => highlightText(term, `gw-${severity}`));
     });
     highlighted = true;
+    return findings;
   }
 }
-highlightAll()
+var findings = highlightAll();
 // 4) Messaging for popup.js (unchanged)
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
