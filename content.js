@@ -107,10 +107,10 @@ leafBtn.onclick = () => {
         list.appendChild(li).innerHTML = `
         <h3 style="margin-top:0; font-size:18px; color:#2e7d32;">${company["Shop Name"]}</h3>
         <li><strong>EcoScore: ${ecoScore}/100</strong> <br/>${stars}</li>
-        <li><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> CO₂: ${company["CO2"]} tons/year</li>
-        <li><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> Water: ${company["Water"]} million L/year</li>
-        <li><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> Electricity: ${company["Electricity"]} GWh/year</li>
-        <li><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> Waste: ${company["Waste"]} tons/year</li>
+        <li><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> CO₂: ${company["CO2"]} Kg/Unit</li>
+        <li><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> Water: ${company["Water"]} L/Unit</li>
+        <li><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> Electricity: ${company["Electricity"]} Wh/Unit</li>
+        <li><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> Waste: ${company["Waste"]} Kg/Unit</li>
         <li><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> ISO Certified: ${company["ISO Certified"]}</li>
         <li></li>`
       });
@@ -153,10 +153,10 @@ leafBtn.onclick = () => {
         <li><strong>Ranking:</strong> #${rank} of ${total}</li>
         <li><strong>Average Score:</strong> ${averageScore}/100</li>
         <li><strong>Top Brands:</strong> ${topBrands.join(", ")}</li>
-        <li><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> CO₂: ${entry["CO2"]} tons/year</li>
-        <li><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> Water: ${entry["Water"]} million L/year</li>
-        <li><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> Electricity: ${entry["Electricity"]} GWh/year</li>
-        <li><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> Waste: ${entry["Waste"]} tons/year</li>
+        <li><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> CO₂: ${entry["CO2"]} Kg/Unit</li>
+        <li><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> Water: ${entry["Water"]} L/Unit</li>
+        <li><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> Electricity: ${entry["Electricity"]} Wh/Unit</li>
+        <li><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px; vertical-align:middle;"> Waste: ${entry["Waste"]} Kg/Unit</li>
         <li><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px; vertical-align:middle;"> ISO Certified: ${entry["ISO Certified"]}</li>
 
         </ul>
@@ -292,7 +292,7 @@ function scoreComparison(filteredCompanies, entry, data) {
   return betterCompanies;
 }
 
-// 1) Your patterns stay the same:
+// 1) patterns stay the same:
 const patterns = [
   {
     category: "Quantitative recycled-content",
@@ -320,7 +320,7 @@ const patterns = [
   }
 ];
 
-// 2) Build your findings
+// 2) Build findings
 const text = document.body.innerText;
 const findings = patterns
   .map(({ category, description, severity, regex }) => {
