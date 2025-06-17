@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "EcoBrand Checker",
+  "name": "Eco Otter",
   "version": "1.0",
   "description": "Show sustainability report for known fashion brands.",
   "permissions": ["tabs", "scripting", "activeTab"],
@@ -22,12 +22,12 @@
   ],
 
   "action": {
-  "default_popup": "popup.html",
-  "default_icon": "images/leaf48.png"
+  "default_icon": "images/ecootter_128x128.png"
 },
 
   "icons": {
-    "48": "images/leaf48.png"
+    "48": "images/ecootter_48.png",
+    "128": "images/ecootter_128x128.png"
   }
 
   
