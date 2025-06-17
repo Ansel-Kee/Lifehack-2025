@@ -24,22 +24,22 @@ const weights = {
   }
 
   function getBasePanelStyles() {
-  return {
-    position: "fixed",
-    top: "160px",
-    right: "20px",
-    background: "#f9fff6",
-    padding: "16px",
-    borderLeft: "5px solid #74c67a",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-    borderRadius: "12px",
-    maxWidth: "280px",
-    zIndex: "9999",
-    fontFamily: "Segoe UI, sans-serif",
-    overflowY: "auto",
-    maxHeight: "400px",
-  };
-}
+    return {
+      position: "fixed",
+      top: "160px",
+      right: "20px",
+      background: "#f9fff6",
+      padding: "16px",
+      borderLeft: "5px solid #74c67a",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+      borderRadius: "12px",
+      maxWidth: "280px",
+      zIndex: "9999",
+      fontFamily: "Segoe UI, sans-serif",
+      overflowY: "auto",
+      maxHeight: "400px",
+    };
+  }
 
   console.log("✅ Found entry:", entry);
 
@@ -47,26 +47,26 @@ const weights = {
   leafBtn.textContent = "🍃";
 
   Object.assign(leafBtn.style, {
-  position: "fixed",
-  top: "100px",
-  right: "20px",
-  zIndex: "9999",
-  background: "#e6f4ea",
-  color: "#4CAF50",
-  border: "2px solid #4CAF50",
-  borderRadius: "50%",
-  width: "40px",
-  height: "40px",
-  fontSize: "20px",
-  cursor: "pointer",
-});
+    position: "fixed",
+    top: "100px",
+    right: "20px",
+    zIndex: "9999",
+    background: "#e6f4ea",
+    color: "#4CAF50",
+    border: "2px solid #4CAF50",
+    borderRadius: "50%",
+    width: "40px",
+    height: "40px",
+    fontSize: "20px",
+    cursor: "pointer",
+  });
 
-  
+
 
   leafBtn.title = "View Sustainability Info";
   document.body.appendChild(leafBtn);
 
-leafBtn.onclick = () => {
+  leafBtn.onclick = () => {
     if (document.getElementById("reportPanel")) return;
 
     const panel = document.createElement("div");
@@ -77,90 +77,85 @@ leafBtn.onclick = () => {
       name: b["Shop Name"],
       score: computeEcoScore(b, data)
     }));
-    function alt(){
+    function alt() {
       let altCompanies = filterAlternative(entry, data);
       let companies = scoreComparison(altCompanies, entry, data);
       panel.innerHTML = `
-  <style>
-    .altdiv {
-      max-height: 280px;
-      overflow-y: auto;
-      padding-right: 5px;
-    }
+        <style>
+          .altdiv {
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 5px;
+          }
 
-    .alt-card {
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 10px;
-      margin-bottom: 15px;
-    }
+          .alt-card {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+          }
 
-    .alt-card h3 {
-      margin: 0;
-      font-size: 18px;
-      color: #2e7d32;
-    }
+          .alt-card h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #2e7d32;
+          }
 
-    .alt-card div {
-      margin-top: 4px;
-    }
+          .alt-card div {
+            margin-top: 4px;
+          }
 
-    .header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
+          .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+          }
 
-    .header-bar button {
-      background: none;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      color: #666;
-    }
-  </style>
+          .header-bar button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #666;
+          }
+        </style>
 
-  <div class="header-bar">
-    <button id="backBtn">← Back</button>
-    <button id="closeBtn">❌</button>
-  </div>
+        <div class="header-bar">
+          <button id="backBtn">← Back</button>
+          <button id="closeBtn">❌</button>
+        </div>
 
-  <div class="altdiv" id="alts"></div>
-`;
-Object.assign(panel.style, getBasePanelStyles());
+        <div class="altdiv" id="alts"></div>
+      `;
+      Object.assign(panel.style, getBasePanelStyles());
 
-
-
-
-
-      
       var list = document.getElementById("alts");
-  companies.forEach((company) => {
-  const ecoScore = computeEcoScore(company, data);
-  const starCount = Math.round(ecoScore / 20); // 5-star scale
-  const stars = "⭐️".repeat(starCount) + "☆".repeat(5 - starCount);
-  
-  const card = document.createElement("div");
-  card.style.marginBottom = "15px";
-  card.style.borderBottom = "1px solid #ccc";
-  card.style.paddingBottom = "10px";
-  card.innerHTML = `
-    <h3 style="margin:0; font-size:18px; color:#2e7d32;">${company["Shop Name"]}</h3>
-    <div><strong>EcoScore: ${ecoScore}/100</strong><br/>${stars}</div>
-    <div><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px;"> CO₂: ${company["CO2"]} Kg/Unit</div>
-    <div><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px;"> Water: ${company["Water"]} L/Unit</div>
-    <div><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px;"> Electricity: ${company["Electricity"]} Wh/Unit</div>
-    <div><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px;"> Waste: ${company["Waste"]} Kg/Unit</div>
-    <div><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px;"> ISO Certified: ${company["ISO Certified"]}</div>
-  `;
-  list.appendChild(card);
-});
+      companies.forEach((company) => {
+        const ecoScore = computeEcoScore(company, data);
+        const starCount = Math.round(ecoScore / 10); // 5-star scale
+        const stars = "⭐️".repeat(starCount) + "☆".repeat(10 - starCount);
 
-      document.getElementById("backBtn").onclick = () =>  {
+        const card = document.createElement("div");
+        card.style.marginBottom = "15px";
+        card.style.borderBottom = "1px solid #ccc";
+        card.style.paddingBottom = "10px";
+        card.innerHTML = `
+        <h3 style="margin:0; font-size:18px; color:#2e7d32;"><a href=https://${company["URL"]}>${company["Shop Name"]}</a></h3>
+        <div><strong>EcoScore: ${ecoScore}/100</strong><br/>${stars}</div>
+        <div><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px;"> CO₂: ${company["CO2"]} Kg/Unit</div>
+        <div><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px;"> Water: ${company["Water"]} L/Unit</div>
+        <div><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px;"> Electricity: ${company["Electricity"]} Wh/Unit</div>
+        <div><img src="${chrome.runtime.getURL("images/waste.png")}" style="height:18px;"> Waste: ${company["Waste"]} Kg/Unit</div>
+        <div><img src="${chrome.runtime.getURL("images/iso.png")}" style="height:18px;"> ISO Certified: ${company["ISO Certified"]}</div>
+      `;
+        list.appendChild(card);
+      });
+
+      document.getElementById("backBtn").onclick = () => {
         panel.innerHTML = companyInfo;
         document.getElementById("closeBtn").onclick = () => panel.remove();
-        document.getElementById("altBtn").onclick = ()=> alt();
-    
+        document.getElementById("altBtn").onclick = () => alt();
+
       }
       document.getElementById("closeBtn").onclick = () => panel.remove();
     };
@@ -169,9 +164,8 @@ Object.assign(panel.style, getBasePanelStyles());
     const rank = sorted.findIndex(b => b.name.toLowerCase() === entry["Shop Name"].toLowerCase()) + 1;
     const total = sorted.length;
     const averageScore = Math.round(sorted.reduce((acc, b) => acc + b.score, 0) / total);
-    const topBrands = sorted.slice(0, 3).map(b => b.name);
-    const starCount = Math.round(ecoScore / 20); // 5-star scale
-    const stars = "⭐️".repeat(starCount) + "☆".repeat(5 - starCount);
+    const starCount = Math.round(ecoScore / 10); // 5-star scale
+    const stars = "⭐️".repeat(starCount) + "☆".repeat(10 - starCount);
 
     let companyInfo = `
       <style>
@@ -187,14 +181,13 @@ Object.assign(panel.style, getBasePanelStyles());
         position:absolute; top:8px; right:10px; border:none; background:none;
         font-size:16px; cursor:pointer; color:#666;">❌</button>
 
-      <h3 style="margin-top:0; font-size:18px; color:#2e7d32;">${entry["Shop Name"]}</h3>
+      <h3 style="margin-top:0; font-size:18px; color:#2e7d32;"><a href=${entry["URL"]}>${entry["Shop Name"]}</a></h3>
       <p style="margin-bottom:12px;"><em>${entry["Category"]}</em></p>
 
       <div style="margin:15px; line-height:1.8;">
       <div><strong>EcoScore: ${ecoScore}/100</strong> <br/>${stars}</div>
       <div><strong>Ranking:</strong> #${rank} of ${total}</div>
       <div><strong>Average Score:</strong> ${averageScore}/100</div>
-      <div><strong>Top Brands:</strong> ${topBrands.join(", ")}</div>
       <div><img src="${chrome.runtime.getURL("images/co2.png")}" style="height:18px; vertical-align:middle;"> CO₂: ${entry["CO2"]} Kg/Unit</div>
       <div><img src="${chrome.runtime.getURL("images/water.png")}" style="height:18px; vertical-align:middle;"> Water: ${entry["Water"]} L/Unit</div>
       <div><img src="${chrome.runtime.getURL("images/electricity.png")}" style="height:18px; vertical-align:middle;"> Electricity: ${entry["Electricity"]} Wh/Unit</div>
@@ -204,52 +197,52 @@ Object.assign(panel.style, getBasePanelStyles());
 
       <div style="display: flex; gap: 8px; margin-top: 10px;">
         <button id="altBtn" style="
-    flex: 1;
-    padding: 6px 10px;
-    border-radius: 6px;
-    background-color: #e0f2f1;
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
-    color: #00796b;
-    font-weight: 600;
-  ">🌿 Alternatives</button>
-
-        <button id="greenwashBtn" style="
         flex: 1;
-    padding: 6px 10px;
-    border-radius: 6px;
-    background-color: #fff3e0;
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
-    color: #ef6c00;
-    font-weight: 600;  
-    ">🧪 Greenwashing</button>
-    </div>
-    `;
-    
+        padding: 6px 10px;
+        border-radius: 6px;
+        background-color: #e0f2f1;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+        color: #00796b;
+        font-weight: 600;
+      ">🌿 Alternatives</button>
+
+            <button id="greenwashBtn" style="
+            flex: 1;
+        padding: 6px 10px;
+        border-radius: 6px;
+        background-color: #fff3e0;
+        border: none;
+        font-size: 14px;
+        cursor: pointer;
+        color: #ef6c00;
+        font-weight: 600;  
+        ">🧪 Greenwashing</button>
+        </div>
+        `;
+
 
     panel.innerHTML = companyInfo
     document.body.appendChild(panel);
     document.getElementById("closeBtn").onclick = () => panel.remove();
-    document.getElementById("altBtn").onclick = ()=> alt();
+    document.getElementById("altBtn").onclick = () => alt();
 
     document.getElementById("greenwashBtn").onclick = () => {
-  const existing = document.getElementById("greenwashReport");
-  if (existing) {
-    existing.remove();
-    return;
-  }
+      const existing = document.getElementById("greenwashReport");
+      if (existing) {
+        existing.remove();
+        return;
+      }
 
-  const resultsPanel = document.createElement("div");
-  resultsPanel.id = "greenwashReport";
-  resultsPanel.style.marginTop = "10px";
-  resultsPanel.style.maxHeight = "200px";
-  resultsPanel.style.overflowY = "auto";
+      const resultsPanel = document.createElement("div");
+      resultsPanel.id = "greenwashReport";
+      resultsPanel.style.marginTop = "10px";
+      resultsPanel.style.maxHeight = "200px";
+      resultsPanel.style.overflowY = "auto";
 
-  const hasFindings = findings.length > 0;
-  resultsPanel.innerHTML = `
+      const hasFindings = findings.length > 0;
+      resultsPanel.innerHTML = `
     <div style="
       margin-bottom:10px; padding:8px 10px; border-radius:6px;
       background-color: ${hasFindings ? "#fff3e0" : "#e8f5e9"};
@@ -258,29 +251,29 @@ Object.assign(panel.style, getBasePanelStyles());
       color: ${hasFindings ? "#ef6c00" : "#2e7d32"};
     ">
       ${hasFindings
-        ? "⚠️ Greenwashing patterns found:"
-        : "✅ No greenwashing patterns detected."}
+          ? "⚠️ Greenwashing patterns found:"
+          : "✅ No greenwashing patterns detected."}
     </div>
     <ul style="list-style:none; padding:0;"></ul>
   `;
 
-  const ul = resultsPanel.querySelector("ul");
-  findings.forEach(({ category, description, hits, severity }) => {
-    const li = document.createElement("li");
-    li.style.marginBottom = "10px";
-    li.style.fontSize = "14px";
-    li.style.color = severity === "issue" ? "#c62828" :
-                     severity === "warning" ? "#ef6c00" : "#2e7d32";
-    li.innerHTML = `
+      const ul = resultsPanel.querySelector("ul");
+      findings.forEach(({ category, description, hits, severity }) => {
+        const li = document.createElement("li");
+        li.style.marginBottom = "10px";
+        li.style.fontSize = "14px";
+        li.style.color = severity === "issue" ? "#c62828" :
+          severity === "warning" ? "#ef6c00" : "#2e7d32";
+        li.innerHTML = `
       <strong>${category}</strong><br>
       <em style="font-size:12px">${description}</em><br>
       Keywords: ${hits.join(", ")}
     `;
-    ul.appendChild(li);
-  });
+        ul.appendChild(li);
+      });
 
-  panel.appendChild(resultsPanel);
-};
+      panel.appendChild(resultsPanel);
+    };
 
 
   };
@@ -302,11 +295,11 @@ async function detectBrandFromPage() {
       try {
         el = await waitForElement(".pdp-product-brand-v2__brand-link");
       } catch {
-      console.warn("Lazada brand element not found");
-      return null;
+        console.warn("Lazada brand element not found");
+        return null;
+      }
     }
-  }
-  return el.textContent.trim();
+    return el.textContent.trim();
 
   } else if (url === "amazon.sg") {
     const el = await waitForElement("#bylineInfo");
@@ -385,7 +378,7 @@ function computeEcoScore(entry, data) {
     const norm = normalise(raw, min, max);
     score += weights[key] * norm;
   }
-  
+
   const isoScore = (entry["ISO Certified"]?.toLowerCase() === "yes") ? 1 : 0;
   score += weights.ISO * isoScore;
 
@@ -398,8 +391,8 @@ function scoreComparison(filteredCompanies, entry, data) {
 
   for (let i = 0; i < filteredCompanies.length; i++) {
     const company = filteredCompanies[i];
-    let companyScore = computeEcoScore(entry, data);
-    if (companyScore <= entryScore){
+    let companyScore = computeEcoScore(company, data);
+    if (companyScore >= entryScore) {
       betterCompanies.push(company);
     }
   }
